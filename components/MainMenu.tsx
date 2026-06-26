@@ -12,6 +12,7 @@ export default function MainMenu() {
   const [nameError, setNameError] = useState("");
   const [focusedButton, setFocusedButton] = useState(0);
   const totalButtons = 3;
+  
   const videoRef = useRef<HTMLVideoElement>(null);
   const musicRef = useRef<HTMLAudioElement>(null);
 
@@ -21,8 +22,11 @@ export default function MainMenu() {
       videoRef.current.volume = 1;
     }
     if (musicRef.current) {
-      musicRef.current.volume = 0;
-      musicRef.current.play();
+      // CORRECCIÓN: El volumen estaba en 0. Lo ajustamos a 0.5 (50%) o 1 (100%).
+      musicRef.current.volume = 0.5; 
+      
+      // Manejo de la promesa de play() para evitar errores en consola si el navegador bloquea el autoplay
+      musicRef.current.play().catch((err) => console.log("Interacción requerida para el audio", err));
     }
   };
 
@@ -34,6 +38,7 @@ export default function MainMenu() {
         if (showNameForm) { setShowNameForm(false); setNameError(""); return; }
       }
 
+      // Si hay un modal abierto, bloqueamos la navegación del fondo
       if (showNameForm || showInstructions) return;
 
       if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") {
@@ -46,7 +51,8 @@ export default function MainMenu() {
       }
       if (e.key === " " || e.key === "Enter") {
         e.preventDefault();
-        handleUnmute();
+        handleUnmute(); // Intentamos activar el audio si interactúa con teclado
+        
         if (focusedButton === 0) { setShowNameForm(true); setNameError(""); }
         if (focusedButton === 1) { setShowInstructions(true); }
         if (focusedButton === 2) { window.open("https://github.com/luisfernando18/PROYECTO-JUEGO", "_blank"); }
@@ -75,14 +81,20 @@ export default function MainMenu() {
       setNameError("Solo se permiten letras, números y espacios.");
       return;
     }
+    
     localStorage.setItem("playerName", trimmed);
-    musicRef.current?.pause();
+    
+    // CORRECCIÓN: Pausar y reiniciar el tiempo del audio antes de cambiar de ruta
+    if (musicRef.current) {
+      musicRef.current.pause();
+      musicRef.current.currentTime = 0;
+    }
+    
     router.push("/game");
   };
 
   return (
     <div className={styles.wrapper}>
-
       <video className={styles.videoBg} autoPlay loop muted playsInline ref={videoRef}>
         <source src="/assets/video/VideoFondoMenu.mp4" type="video/mp4" />
       </video>
@@ -114,8 +126,8 @@ export default function MainMenu() {
             Instrucciones
           </button>
 
-          
-            <a className={`${styles.btn} ${focusedButton === 2 ? styles.btnFocused : ""}`}
+          <a 
+            className={`${styles.btn} ${focusedButton === 2 ? styles.btnFocused : ""}`}
             href="https://github.com/luisfernando18/PROYECTO-JUEGO"
             target="_blank"
             rel="noopener noreferrer"
@@ -173,9 +185,10 @@ export default function MainMenu() {
           </div>
         </div>
       )}
-      {/* CRÉDITOS — esquina inferior derecha */}
+      
+      {/* CRÉDITOS */}
       <div className={styles.credits}>
-        © 2025 Proyecto Universitario <br></br> <br></br>ULEAM
+        © 2025 Proyecto Universitario <br /><br />ULEAM
       </div>
     </div>
   );
