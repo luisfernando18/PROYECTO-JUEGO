@@ -4,28 +4,34 @@ import { useEffect, useRef } from "react";
 
 export default function GameContainer() {
   const gameRef = useRef<HTMLDivElement>(null);
+  const gameInitialized = useRef(false); // Bandera para evitar doble canvas en Strict Mode
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || gameInitialized.current) return;
 
-    let game: any;
+    let game: import("phaser").Game; 
 
     const initPhaser = async () => {
+      gameInitialized.current = true; // Marcamos como iniciado
+      
       const Phaser = (await import("phaser")).default;
-
       const Zone1Scene = (await import("@/game/scenes/Zone1Scene")).default;
 
       const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
-        width: window.innerWidth,
-        height: window.innerHeight,
         backgroundColor: "#1a0a00",
-        parent: gameRef.current!,
+        // Mejoramos la responsividad con el Scale Manager de Phaser
+        scale: {
+          mode: Phaser.Scale.RESIZE,
+          parent: gameRef.current!,
+          width: "100%",
+          height: "100%",
+        },
         physics: {
           default: "arcade",
           arcade: {
             gravity: { x: 0, y: 600 },
-            debug: false,
+            debug: false, // Cámbialo a true temporalmente si necesitas ver las cajas de colisión
           },
         },
         scene: [Zone1Scene],
@@ -36,8 +42,12 @@ export default function GameContainer() {
 
     initPhaser();
 
+    // Limpieza al desmontar el componente
     return () => {
-      game?.destroy(true);
+      if (game) {
+        game.destroy(true);
+        gameInitialized.current = false;
+      }
     };
   }, []);
 
