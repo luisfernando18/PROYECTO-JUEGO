@@ -28,6 +28,7 @@ export default class Zone1Scene extends Phaser.Scene {
     this.load.image("bg-mid", "/assets/sprites/zone1/medio.png");
     this.load.image("bg-front", "/assets/sprites/zone1/frente.png");
     this.load.image("ground", "/assets/sprites/zone1/suelo.jpg");
+    this.load.image("platform", "/assets/sprites/zone1/suelo.jpg");
   }
 
   create() {
@@ -83,17 +84,19 @@ export default class Zone1Scene extends Phaser.Scene {
 
     // Plataformas flotantes distribuidas en 2 pantallas
     const platData = [
-      { x: 300,              y: H - 150 },
-      { x: 600,              y: H - 250 },
-      { x: 900,              y: H - 180 },
-      { x: W + 150,          y: H - 300 },
-      { x: W + 450,          y: H - 200 },
-      { x: W + 750,          y: H - 280 },
-      { x: this.worldWidth - 250, y: H - 180 },
+      { x: 500,              y: H - 500 },
+      { x: 850,              y: H - 320 },
+      { x: W + 200,              y: H - 325 },
+      { x: W + 500,          y: H - 520 },
+      { x: W + 900,          y: H - 325 },
+      { x: W + 1200,          y: H - 525 },
+      { x: this.worldWidth - 250, y: H - 325 },
     ];
 
     platData.forEach(({ x, y }) => {
-      const plat = this.add.rectangle(x, y, 160, 20, 0x6b4c2a);
+      const plat = this.add.tileSprite(x, y, 180, 50, "platform")
+        .setOrigin(0.5, 0.5)
+        .setTileScale(0.09, 0.05);
       this.physics.add.existing(plat, true);
       this.platforms.add(plat);
     });
