@@ -1,150 +1,78 @@
-"use client";
-
-import {
-    useEffect,
-    useState
+.hud {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+    align-items: flex-start;
 }
 
-from "react";
-import gameEvents from "@/lib/gameEvents";
-import styles from "./HUD.module.css";
+.zoneName {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    color: #e8d5a3;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid #6b5030;
+    padding: 5px 12px;
+    border-radius: 4px;
+    margin-bottom: 4px;
+}
 
-export default function HUD() {
-    const [hp,
-    setHp]=useState(100);
-    const [maxHp]=useState(100);
-    const [kills,
-    setKills]=useState(0);
-    const [curas,
-    setCuras]=useState(5);
-    const [zoneName,
-    setZoneName]=useState("Selva Ancestral");
+.hpSection {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
 
-    useEffect(()=> {
-            const onHpChange=(value: number)=> setHp(value);
-            const onEnemyKilled=(value: number)=> setKills(value);
-            const onCuras=(value: number)=> setCuras(value);
-            const onZoneChange=(value: string)=> setZoneName(value);
+.hpBarBg {
+    width: 400px;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #6b5030;
+    border-radius: 6px;
+    overflow: hidden;
+}
 
-            gameEvents.on("hp", onHpChange);
-            gameEvents.on("enemyKilled", onEnemyKilled);
-            gameEvents.on("curas", onCuras);
-            gameEvents.on("zone", onZoneChange);
+.hpBarFill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
 
-            return ()=> {
-                gameEvents.off("hp", onHpChange);
-                gameEvents.off("enemyKilled", onEnemyKilled);
-                gameEvents.off("curas", onCuras);
-                gameEvents.off("zone", onZoneChange);
-            }
+.hpText {
+    font-size: 1rem;
+    color: #a89070;
+    font-family: 'Cinzel', serif;
+}
 
-            ;
-        }
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid #6b5030;
+    padding: 4px 10px;
+    border-radius: 4px;
+    width: fit-content;
+}
 
-        , []);
+.label {
+    font-size: 1rem;
+    color: #a89070;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.1em;
+}
 
-    const hpPercent=Math.max(0, (hp / maxHp) * 100);
-
-    const barColor=hpPercent>60 ? "#f44336" : hpPercent>30 ? "#f44336" : "#f44336";
-
-    return (<div className= {
-            styles.hud
-        }
-
-        > {
-            /* NOMBRE DE LA ZONA */
-        }
-
-        <div className= {
-            styles.zoneName
-        }
-
-        > {
-            zoneName
-        }
-
-        </div> {
-            /* VIDA */
-        }
-
-        <div className= {
-            styles.hpSection
-        }
-
-        > <span className= {
-            styles.label
-        }
-
-        >❤ VIDA</span> <div className= {
-            styles.hpBarBg
-        }
-
-        > <div className= {
-            styles.hpBarFill
-        }
-
-        style= {
-                {
-                width: `$ {
-                    hpPercent
-                }
-
-                %`,
-                backgroundColor: barColor,
-            }
-        }
-
-        /> </div> <span className= {
-            styles.hpText
-        }
-
-        > {
-            hp
-        }
-
-        / {
-            maxHp
-        }
-
-        </span> </div> {
-            /* ENEMIGOS DERROTADOS */
-        }
-
-        <div className= {
-            styles.stat
-        }
-
-        > <span className= {
-            styles.label
-        }
-
-        >⚔ ENEMIGOS DERROTADOS</span> <span className= {
-            styles.value
-        }
-
-        > {
-            kills
-        }
-
-        </span> </div> {
-            /* CURAS */
-        }
-
-        <div className= {
-            styles.stat
-        }
-
-        > <span className= {
-            styles.label
-        }
-
-        >✦ CURAS</span> <span className= {
-            styles.value
-        }
-
-        > {
-            curas
-        }
-
-        / 5</span> </div> </div>);
+.value {
+    font-size: 0.85rem;
+    color: #f0dcaa;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    min-width: 30px;
+    text-align: right;
 }
