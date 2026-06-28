@@ -1,26 +1,26 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import HUD from "./HUD";
 
 export default function GameContainer() {
   const gameRef = useRef<HTMLDivElement>(null);
-  const gameInitialized = useRef(false); // Bandera para evitar doble canvas en Strict Mode
+  const gameInitialized = useRef(false);
 
   useEffect(() => {
     if (typeof window === "undefined" || gameInitialized.current) return;
 
-    let game: import("phaser").Game; 
+    let game: import("phaser").Game;
 
     const initPhaser = async () => {
-      gameInitialized.current = true; // Marcamos como iniciado
-      
+      gameInitialized.current = true;
+
       const Phaser = (await import("phaser")).default;
       const Zone1Scene = (await import("@/game/scenes/Zone1Scene")).default;
 
       const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
         backgroundColor: "#1a0a00",
-        // Mejoramos la responsividad con el Scale Manager de Phaser
         scale: {
           mode: Phaser.Scale.RESIZE,
           parent: gameRef.current!,
@@ -31,7 +31,7 @@ export default function GameContainer() {
           default: "arcade",
           arcade: {
             gravity: { x: 0, y: 600 },
-            debug: false, // Cámbialo a true temporalmente si necesitas ver las cajas de colisión
+            debug: false,
           },
         },
         scene: [Zone1Scene],
@@ -42,7 +42,6 @@ export default function GameContainer() {
 
     initPhaser();
 
-    // Limpieza al desmontar el componente
     return () => {
       if (game) {
         game.destroy(true);
@@ -52,9 +51,9 @@ export default function GameContainer() {
   }, []);
 
   return (
-    <div
-      ref={gameRef}
-      style={{ width: "100vw", height: "100vh", overflow: "hidden" }}
-    />
+    <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
+      <div ref={gameRef} style={{ width: "100%", height: "100%", overflow: "hidden" }} />
+      <HUD />
+    </div>
   );
 }
