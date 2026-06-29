@@ -47,12 +47,12 @@ export default class Zone1Scene extends Phaser.Scene {
       .setScrollFactor(0);
 
     this.bgMid = this.add
-      .tileSprite(0, 135, this.worldWidth, H, "bg-mid")
+      .tileSprite(0, 250, this.worldWidth, H, "bg-mid")
       .setOrigin(0, 0)
       .setScrollFactor(0);
 
     this.bgFront = this.add
-      .tileSprite(0, -745, this.worldWidth, H + 1000, "bg-front")
+      .tileSprite(0, -625, this.worldWidth, H + 1000, "bg-front")
       .setOrigin(0, 0)
       .setScrollFactor(0);
 
@@ -105,7 +105,7 @@ export default class Zone1Scene extends Phaser.Scene {
     //MUSICA DE FONDO
     this.sound.add("zone1-music", {
       loop: true,
-      volume: 0.2
+      volume: 0.5
     }).play();
   }
 

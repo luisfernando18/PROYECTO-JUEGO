@@ -39,6 +39,11 @@ export default class Player {
       frameWidth: 64,
       frameHeight: 64,
     });
+
+    scene.load.spritesheet("player-idle", "/assets/sprites/Player/idle1.png", {
+      frameWidth: 64,
+      frameHeight: 64,
+    });
   }
 
   // Crea el personaje — se llama en create() de la escena
@@ -71,8 +76,8 @@ export default class Player {
 
     this.scene.anims.create({
       key: "idle",
-      frames: this.scene.anims.generateFrameNumbers("player", { start: 0, end: 0 }),
-      frameRate: 1,
+      frames: this.scene.anims.generateFrameNumbers("player-idle", { start: 0, end: 1 }),
+      frameRate: 3,
       repeat: -1,
     });
 
