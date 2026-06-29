@@ -30,7 +30,7 @@ export default function GameContainer() {
         physics: {
           default: "arcade",
           arcade: {
-            gravity: { x: 0, y: 600 },
+            gravity: { x: 0, y: 2000 },
             debug: false,
           },
         },
