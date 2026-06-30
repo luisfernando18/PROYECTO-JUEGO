@@ -4,6 +4,7 @@ import gameEvents from "@/lib/gameEvents";
 export default class Player {
   private scene: Phaser.Scene;
   public sprite!: Phaser.Physics.Arcade.Sprite;
+  private attackHitbox!: Phaser.GameObjects.Zone;
 
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: {
@@ -25,7 +26,6 @@ export default class Player {
     this.scene = scene;
   }
 
-  // Carga los assets del personaje — se llama en preload() de la escena
   static preload(scene: Phaser.Scene) {
     scene.load.spritesheet("player", "/assets/sprites/Player/correr1.png", {
       frameWidth: 64,
@@ -39,26 +39,21 @@ export default class Player {
       frameWidth: 64,
       frameHeight: 64,
     });
-
     scene.load.spritesheet("player-idle", "/assets/sprites/Player/idle1.png", {
       frameWidth: 64,
       frameHeight: 64,
     });
   }
 
-  // Crea el personaje — se llama en create() de la escena
   create(x: number, y: number, platforms: Phaser.Physics.Arcade.StaticGroup) {
-    // Variables de estado
     this.hp = 100;
     this.maxHp = 100;
     this.curas = 5;
     this.isAttacking = false;
 
-    // Emite valores iniciales al HUD
     gameEvents.emit("hp", this.hp);
     gameEvents.emit("curas", this.curas);
 
-    // SPRITE
     this.sprite = this.scene.physics.add.sprite(x, y, "player");
     this.sprite.setScale(2.2);
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
@@ -66,7 +61,6 @@ export default class Player {
     body.setOffset(12, 6);
     body.setCollideWorldBounds(true);
 
-    // ANIMACIONES
     this.scene.anims.create({
       key: "run",
       frames: this.scene.anims.generateFrameNumbers("player", { start: 0, end: 7 }),
@@ -97,10 +91,8 @@ export default class Player {
 
     this.sprite.play("idle");
 
-    // COLISIÓN CON PLATAFORMAS
     this.scene.physics.add.collider(this.sprite, platforms);
 
-    // CONTROLES
     this.cursors = this.scene.input.keyboard!.createCursorKeys();
     this.wasd = {
       up: this.scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
@@ -112,7 +104,6 @@ export default class Player {
     this.healKey = this.scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
     this.attackKey = this.scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.F);
 
-    // ATAQUE CON CLICK IZQUIERDO
     this.scene.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       if (pointer.leftButtonDown() && !this.isAttacking) {
         this.isAttacking = true;
@@ -124,7 +115,6 @@ export default class Player {
     });
   }
 
-  // Se llama en update() de la escena
   update() {
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
     const onGround = body.blocked.down;
@@ -136,7 +126,6 @@ export default class Player {
       Phaser.Input.Keyboard.JustDown(this.wasd.up) ||
       Phaser.Input.Keyboard.JustDown(this.spaceKey);
 
-    // CURAR — tecla Q
     if (Phaser.Input.Keyboard.JustDown(this.healKey)) {
       if (this.curas > 0 && this.hp < this.maxHp) {
         this.curas--;
@@ -146,7 +135,6 @@ export default class Player {
       }
     }
 
-    // ATAQUE — tecla F
     if (Phaser.Input.Keyboard.JustDown(this.attackKey) && !this.isAttacking) {
       this.isAttacking = true;
       this.sprite.play("attack");
@@ -155,7 +143,6 @@ export default class Player {
       });
     }
 
-    // Si está atacando no interrumpimos la animación
     if (this.isAttacking) {
       if (goLeft) body.setVelocityX(-200);
       else if (goRight) body.setVelocityX(200);
@@ -163,7 +150,6 @@ export default class Player {
       return;
     }
 
-    // ANIMACIÓN EN EL AIRE
     if (!onGround) {
       if (goLeft) {
         body.setVelocityX(-450);
@@ -184,14 +170,12 @@ export default class Player {
       return;
     }
 
-    // SALTO
     if (jump) {
       body.setVelocityY(-1000);
       this.sprite.play("jump", true);
       return;
     }
 
-    // MOVIMIENTO EN EL SUELO
     if (goLeft) {
       body.setVelocityX(-450);
       this.sprite.setFlipX(true);
@@ -206,21 +190,33 @@ export default class Player {
     }
   }
 
-  // Método para recibir daño — se usará cuando agreguemos enemigos
   takeDamage(amount: number) {
     this.hp -= amount;
     if (this.hp < 0) this.hp = 0;
     gameEvents.emit("hp", this.hp);
-    return this.hp <= 0; // retorna true si el jugador murió
+    return this.hp <= 0;
   }
 
-  // Getter del sprite para colisiones con enemigos
   getSprite() {
     return this.sprite;
   }
 
-  // Getter para saber si está atacando — útil para los enemigos
   getIsAttacking() {
     return this.isAttacking;
+  }
+
+  // Hitbox temporal de ataque — se usa para detectar colisión con enemigos
+  getAttackHitbox(): { x: number; y: number; width: number; height: number } | null {
+    if (!this.isAttacking) return null;
+
+    const facing = this.sprite.flipX ? -1 : 1;
+    const offsetX = 50 * facing;
+
+    return {
+      x: this.sprite.x + offsetX,
+      y: this.sprite.y,
+      width: 60,
+      height: 70,
+    };
   }
 }
