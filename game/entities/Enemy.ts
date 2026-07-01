@@ -22,6 +22,7 @@ export default class Enemy {
   protected direction: 1 | -1 = 1;
   protected isDead: boolean = false;
   protected isChasing: boolean = false;
+  protected isKnockedBack: boolean = false;
   protected lastDamageTime: number = 0;
   protected damageCooldown: number = 800;
 
@@ -81,6 +82,7 @@ export default class Enemy {
 
   update() {
     if (this.isDead) return;
+    if (this.isKnockedBack) return; // pausa el comportamiento mientras es empujado
 
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
     const playerSprite = this.player.getSprite();
@@ -117,7 +119,6 @@ export default class Enemy {
     }
   }
 
-  // Verifica si hay plataforma debajo, un poco adelante en la dirección dada
   protected checkGroundAhead(direction: 1 | -1): boolean {
     const checkDistance = 40;
     const checkX = this.sprite.x + checkDistance * direction;
@@ -147,9 +148,42 @@ export default class Enemy {
 
     this.hp--;
 
+    // Flash rojo
     this.sprite.setTint(0xff0000);
     this.scene.time.delayedCall(150, () => {
       if (!this.isDead) this.sprite.clearTint();
+    });
+
+    // Tambaleo al recibir un golpe
+    this.scene.tweens.add({
+      targets: this.sprite,
+      scaleX: 2.35,
+      scaleY: 1.9,
+      duration: 40,
+      yoyo: true,
+      repeat: 5,
+      ease: "Sine.easeInOut",
+      onComplete: () => {
+        this.sprite.setScale(2); // vuelve al tamaño original
+      }
+    });
+
+    // Empuje hacia atrás
+    const playerX = this.player.getSprite().x;
+    const knockbackDirection = this.sprite.x > playerX ? 1 : -1;
+    const body = this.sprite.body as Phaser.Physics.Arcade.Body;
+
+    this.isKnockedBack = true;
+    body.setVelocityX(550 * knockbackDirection);
+
+    // Para el empuje después de 250ms
+    this.scene.time.delayedCall(250, () => {
+      if (!this.isDead) body.setVelocityX(0);
+    });
+
+    // Retoma el control después de 1s
+    this.scene.time.delayedCall(1000, () => {
+      if (!this.isDead) this.isKnockedBack = false;
     });
 
     if (this.hp <= 0) {

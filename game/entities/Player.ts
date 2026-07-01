@@ -35,8 +35,8 @@ export default class Player {
       frameWidth: 64,
       frameHeight: 64,
     });
-    scene.load.spritesheet("player-attack", "/assets/sprites/Player/atacar.png", {
-      frameWidth: 64,
+    scene.load.spritesheet("player-attack", "/assets/sprites/Player/atacar_nuevo.png", {
+      frameWidth: 67.2,
       frameHeight: 64,
     });
     scene.load.spritesheet("player-idle", "/assets/sprites/Player/idle1.png", {
