@@ -145,6 +145,7 @@ export default class Zone1Scene extends Phaser.Scene {
     if (this.enemiesKilled >= this.totalEnemies) {
       this.time.delayedCall(2000, () => {
         alert("Has completado la primera zona");
+        this.sound.stopAll(); //Para todos los sonidos
         this.scene.start("Zone2Scene"); // Cambia a la siguiente zona
       })
     }
