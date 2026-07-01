@@ -15,6 +15,8 @@ export default class Zone1Scene extends Phaser.Scene {
   private enemiesKilled!: number;
   private hasHitThisAttack: boolean = false;
 
+  private totalEnemies!: number;
+
   constructor() {
     super({ key: "Zone1Scene" });
   }
@@ -128,6 +130,8 @@ export default class Zone1Scene extends Phaser.Scene {
       this.enemies.push(enemy);
     });
 
+    this.totalEnemies = this.enemies.length;
+
     // CÁMARA
     this.cameras.main.setBounds(0, 0, this.worldWidth, H);
     this.cameras.main.startFollow(this.player.getSprite(), true, 0.1, 0.1);
@@ -136,6 +140,14 @@ export default class Zone1Scene extends Phaser.Scene {
   private onEnemyDied() {
     this.enemiesKilled++;
     gameEvents.emit("enemyKilled", this.enemiesKilled);
+    
+    //Si todos los enemigos están muertos, pasa a la siguiente zona
+    if (this.enemiesKilled >= this.totalEnemies) {
+      this.time.delayedCall(2000, () => {
+        alert("Has completado la primera zona");
+        this.scene.start("Zone2Scene"); // Cambia a la siguiente zona
+      })
+    }
   }
 
   update() {
