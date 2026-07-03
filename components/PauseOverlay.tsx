@@ -18,10 +18,10 @@ export default function PauseOverlay({ onResume, onMainMenu }: Props) {
                     <h2 className={styles.title}>PAUSA</h2>
                     <div className={styles.buttons}>
                         <button className={styles.btn} onClick={onResume}>
-                            ▶️ Reanudar
+                            ▶ Reanudar
                         </button>
                         <button className={styles.btn} onClick={() => setShowInstructions(true)}>
-                            ? Instrucciones
+                             Instrucciones
                         </button>
                         <button className={`${styles.btn} ${styles.btnDanger}`} onClick={onMainMenu}>
                             ✕ Menú Principal
