@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import gameEvents from "@/lib/gameEvents";
 import styles from "./HUD.module.css";
 
@@ -10,6 +10,8 @@ export default function HUD() {
     const [kills, setKills] = useState(0);
     const [curas, setCuras] = useState(5);
     const [zoneName, setZoneName] = useState("Selva Ancestral");
+    const [timeElapsed, setTimeElapsed] = useState(0);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         const onHpChange = (value: number) => setHp(value);
@@ -22,11 +24,21 @@ export default function HUD() {
         gameEvents.on("curas", onCuras);
         gameEvents.on("zone", onZoneChange);
 
+        // Inicia el timer
+        timerRef.current = setInterval(() => {
+            setTimeElapsed((prev) => {
+                const newTime = prev + 1;
+                gameEvents.emit("timeElapsed", newTime); // emite el tiempo para guardarlo
+                return newTime;
+            });
+        }, 1000);
+
         return () => {
             gameEvents.off("hp", onHpChange);
             gameEvents.off("enemyKilled", onEnemyKilled);
             gameEvents.off("curas", onCuras);
             gameEvents.off("zone", onZoneChange);
+            if (timerRef.current) clearInterval(timerRef.current);
         };
     }, []);
 
@@ -37,37 +49,43 @@ export default function HUD() {
             hpPercent > 30 ? "#f44336" :
                 "#f44336";
 
+    // Formatea el tiempo como MM:SS
+    const formatTime = (seconds: number) => {
+        const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+        const s = (seconds % 60).toString().padStart(2, "0");
+        return `${m}:${s}`;
+    };
+
     return (
         <div className={styles.hud}>
 
-            {/* NOMBRE DE LA ZONA */}
             <div className={styles.zoneName}>{zoneName}</div>
 
-            {/* VIDA */}
             <div className={styles.hpSection}>
                 <span className={styles.label}>❤ VIDA</span>
                 <div className={styles.hpBarBg}>
                     <div
                         className={styles.hpBarFill}
-                        style={{
-                            width: `${hpPercent}%`,
-                            backgroundColor: barColor,
-                        }}
+                        style={{ width: `${hpPercent}%`, backgroundColor: barColor }}
                     />
                 </div>
                 <span className={styles.hpText}>{hp} / {maxHp}</span>
             </div>
 
-            {/* ENEMIGOS DERROTADOS */}
             <div className={styles.stat}>
                 <span className={styles.label}>⚔ ENEMIGOS DERROTADOS</span>
                 <span className={styles.value}>{kills}</span>
             </div>
 
-            {/* CURAS */}
             <div className={styles.stat}>
                 <span className={styles.label}>✦ CURAS</span>
                 <span className={styles.value}>{curas} / 5</span>
+            </div>
+
+            {/* TIMER */}
+            <div className={styles.stat}>
+                <span className={styles.label}>⏱ TIEMPO</span>
+                <span className={styles.value}>{formatTime(timeElapsed)}</span>
             </div>
 
         </div>

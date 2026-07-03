@@ -194,6 +194,11 @@ export default class Player {
     this.hp -= amount;
     if (this.hp < 0) this.hp = 0;
     gameEvents.emit("hp", this.hp);
+
+    if (this.hp <= 0) {
+      gameEvents.emit("playerDead");
+    }
+
     return this.hp <= 0;
   }
 

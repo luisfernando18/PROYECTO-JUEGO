@@ -7,6 +7,7 @@ export default class Zone1Scene extends Phaser.Scene {
   private bgSky!: Phaser.GameObjects.TileSprite;
   private bgMid!: Phaser.GameObjects.TileSprite;
   private bgFront!: Phaser.GameObjects.TileSprite;
+  private bgMusic!: Phaser.Sound.BaseSound;
 
   private player!: Player;
   private enemies: Enemy[] = [];
@@ -14,7 +15,6 @@ export default class Zone1Scene extends Phaser.Scene {
   private worldWidth!: number;
   private enemiesKilled!: number;
   private hasHitThisAttack: boolean = false;
-
   private totalEnemies!: number;
 
   constructor() {
@@ -41,7 +41,8 @@ export default class Zone1Scene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, this.worldWidth, H);
 
     // MÚSICA DE FONDO
-    this.sound.add("zona-audio", { loop: true, volume: 0.5 }).play();
+    this.bgMusic = this.sound.add("zona-audio", { loop: true, volume: 0.5 });
+    this.bgMusic.play();
 
     this.enemiesKilled = 0;
     gameEvents.emit("enemyKilled", this.enemiesKilled);
@@ -49,6 +50,21 @@ export default class Zone1Scene extends Phaser.Scene {
 
     // Escucha cuando un enemigo muere
     gameEvents.on("enemyDied", () => this.onEnemyDied());
+
+    // Cuando el jugador muere, detiene la música
+    gameEvents.on("playerDead", () => {
+      try {
+        if (this.bgMusic && this.bgMusic.isPlaying) {
+          this.bgMusic.stop();
+        }
+      } catch (e) { }
+    });
+
+    // Limpia listeners cuando la escena se apaga
+    this.events.on("shutdown", () => {
+      gameEvents.removeAllListeners("playerDead");
+      gameEvents.removeAllListeners("enemyDied");
+    });
 
     // CAPAS DE PARALLAX
     this.bgSky = this.add
@@ -74,7 +90,7 @@ export default class Zone1Scene extends Phaser.Scene {
       this.worldWidth, 275,
       "ground"
     ).setOrigin(0.5, 0.5)
-     .setTileScale(0.09, 0.12);
+      .setTileScale(0.09, 0.12);
     this.physics.add.existing(ground, true);
     this.platforms.add(ground);
 
@@ -87,12 +103,12 @@ export default class Zone1Scene extends Phaser.Scene {
     this.platforms.add(wallRight);
 
     const platData = [
-      { x: 500,                   y: H - 500 },
-      { x: 850,                   y: H - 320 },
-      { x: W + 200,               y: H - 325 },
-      { x: W + 500,               y: H - 520 },
-      { x: W + 900,               y: H - 325 },
-      { x: W + 1200,              y: H - 525 },
+      { x: 500, y: H - 500 },
+      { x: 850, y: H - 320 },
+      { x: W + 200, y: H - 325 },
+      { x: W + 500, y: H - 520 },
+      { x: W + 900, y: H - 325 },
+      { x: W + 1200, y: H - 525 },
       { x: this.worldWidth - 250, y: H - 325 },
     ];
 
@@ -110,18 +126,18 @@ export default class Zone1Scene extends Phaser.Scene {
 
     // ENEMIGOS
     const enemyData = [
-      { x: 600,       y: H - 215, range: 150 },
-      { x: 850,   y: H - 395, range: 80 },
-      { x: 1500,      y: H - 215, range: 100 },
-      { x: W + 500,   y: H - 720, range: 80 },
-      { x: W ,   y: H - 215, range: 80 },
-      { x: W + 600,   y: H - 215, range: 200 },
-      { x: W + 800,   y: H - 215, range: 200 },
-      { x: W + 1300,   y: H - 215, range: 200 },
-      { x: 500,   y: H - 585, range: 80 },
-      { x: W + 1200,   y: H - 625, range: 80 },
-      { x: W + 900,   y: H - 425, range: 80 },
-      { x: this.worldWidth - 250,   y: H - 500, range: 80 },
+      { x: 600, y: H - 215, range: 150 },
+      { x: 850, y: H - 395, range: 80 },
+      { x: 1500, y: H - 215, range: 100 },
+      { x: W + 500, y: H - 720, range: 80 },
+      { x: W, y: H - 215, range: 80 },
+      { x: W + 600, y: H - 215, range: 200 },
+      { x: W + 800, y: H - 215, range: 200 },
+      { x: W + 1300, y: H - 215, range: 200 },
+      { x: 500, y: H - 585, range: 80 },
+      { x: W + 1200, y: H - 625, range: 80 },
+      { x: W + 900, y: H - 425, range: 80 },
+      { x: this.worldWidth - 250, y: H - 500, range: 80 },
     ];
 
     enemyData.forEach(({ x, y, range }) => {
@@ -140,14 +156,16 @@ export default class Zone1Scene extends Phaser.Scene {
   private onEnemyDied() {
     this.enemiesKilled++;
     gameEvents.emit("enemyKilled", this.enemiesKilled);
-    
-    //Si todos los enemigos están muertos, pasa a la siguiente zona
+
     if (this.enemiesKilled >= this.totalEnemies) {
       this.time.delayedCall(2000, () => {
-        alert("Has completado la primera zona");
-        this.sound.stopAll(); //Para todos los sonidos
-        this.scene.start("Zone2Scene"); // Cambia a la siguiente zona
-      })
+        try {
+          if (this.bgMusic && this.bgMusic.isPlaying) {
+            this.bgMusic.stop();
+          }
+        } catch (e) { }
+        this.scene.start("Zone2Scene");
+      });
     }
   }
 
@@ -164,12 +182,16 @@ export default class Zone1Scene extends Phaser.Scene {
     // ACTUALIZA ENEMIGOS Y DETECTA GOLPES DEL JUGADOR
     const hitbox = this.player.getAttackHitbox();
 
+    // Resetea el hitbox fuera del forEach
+    if (!hitbox) {
+      this.hasHitThisAttack = false;
+    }
+
     this.enemies.forEach((enemy) => {
       if (enemy.getIsDead()) return;
 
       enemy.update();
 
-      // Si el jugador está atacando, verifica si el hitbox toca al enemigo
       if (hitbox && !this.hasHitThisAttack) {
         const enemySprite = enemy.getSprite();
         const dx = Math.abs(hitbox.x - enemySprite.x);
@@ -179,10 +201,6 @@ export default class Zone1Scene extends Phaser.Scene {
           enemy.takeHit();
           this.hasHitThisAttack = true;
         }
-      }
-
-      if (!hitbox) {
-        this.hasHitThisAttack = false; // se resetea cuando termina el ataque
       }
     });
   }

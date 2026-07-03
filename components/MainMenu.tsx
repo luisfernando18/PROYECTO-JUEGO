@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./MainMenu.module.css";
+import { clearSession } from "@/lib/storage";
 
 export default function MainMenu() {
   const router = useRouter();
@@ -12,7 +13,7 @@ export default function MainMenu() {
   const [nameError, setNameError] = useState("");
   const [focusedButton, setFocusedButton] = useState(0);
   const totalButtons = 3;
-  
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const musicRef = useRef<HTMLAudioElement>(null);
 
@@ -23,8 +24,8 @@ export default function MainMenu() {
     }
     if (musicRef.current) {
       // CORRECCIÓN: El volumen estaba en 0. Lo ajustamos a 0.5 (50%) o 1 (100%).
-      musicRef.current.volume = 0.5; 
-      
+      musicRef.current.volume = 0.5;
+
       // Manejo de la promesa de play() para evitar errores en consola si el navegador bloquea el autoplay
       musicRef.current.play().catch((err) => console.log("Interacción requerida para el audio", err));
     }
@@ -52,7 +53,7 @@ export default function MainMenu() {
       if (e.key === " " || e.key === "Enter") {
         e.preventDefault();
         handleUnmute(); // Intentamos activar el audio si interactúa con teclado
-        
+
         if (focusedButton === 0) { setShowNameForm(true); setNameError(""); }
         if (focusedButton === 1) { setShowInstructions(true); }
         if (focusedButton === 2) { window.open("https://github.com/luisfernando18/PROYECTO-JUEGO", "_blank"); }
@@ -81,15 +82,18 @@ export default function MainMenu() {
       setNameError("Solo se permiten letras, números y espacios.");
       return;
     }
-    
+
     localStorage.setItem("playerName", trimmed);
-    
+
     // CORRECCIÓN: Pausar y reiniciar el tiempo del audio antes de cambiar de ruta
     if (musicRef.current) {
       musicRef.current.pause();
       musicRef.current.currentTime = 0;
     }
-    
+
+    localStorage.setItem("playerName", trimmed);
+    clearSession(); //Limpia cualquier sesión anterior
+
     router.push("/game");
   };
 
@@ -126,7 +130,7 @@ export default function MainMenu() {
             Instrucciones
           </button>
 
-          <a 
+          <a
             className={`${styles.btn} ${focusedButton === 2 ? styles.btnFocused : ""}`}
             href="https://github.com/luisfernando18/PROYECTO-JUEGO"
             target="_blank"
@@ -176,8 +180,10 @@ export default function MainMenu() {
               <li><span className={styles.key}>X / Barra Espaciadora</span> Saltar</li>
               <li><span className={styles.key}>A / ←</span> Moverse a la izquierda</li>
               <li><span className={styles.key}>D / →</span> Moverse a la derecha</li>
-              <li><span className={styles.key}>▢ / Clic Izquierdo</span> Atacar</li>
-              <li><span className={styles.key}>ESC / ►</span> Pausa</li>
+              <li><span className={styles.key}>▢ / Clic Izquierdo / F</span> Atacar</li>
+              <li><span className={styles.key}>△ / Q</span> Usar cura</li>
+              <li><span className={styles.key}>ESC / ►</span> Pausar / Reanudar</li>
+              <li><span className={styles.key}>Mando</span> D-pad + botones A/B</li>
             </ul>
             <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setShowInstructions(false)}>
               Entendido
@@ -185,10 +191,10 @@ export default function MainMenu() {
           </div>
         </div>
       )}
-      
+
       {/* CRÉDITOS */}
       <div className={styles.credits}>
-        © 2025 Proyecto Universitario <br /><br />ULEAM
+        ©️ 2025 Proyecto Universitario <br /><br />ULEAM
       </div>
     </div>
   );

@@ -1,0 +1,95 @@
+.backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 150;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.title {
+    font-family: 'Cinzel', serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #e8d5a3;
+    letter-spacing: 0.3em;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9);
+}
+
+.buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 240px;
+}
+
+.btn {
+    width: 100%;
+    padding: 14px 0;
+    text-align: center;
+    background: rgba(20, 14, 8, 0.85);
+    color: #c8a85a;
+    border: 1px solid #6b5030;
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.btn:hover {
+    background: rgba(100, 70, 20, 0.6);
+    border-color: #c8a85a;
+    color: #f0dcaa;
+}
+
+.btnDanger {
+    border-color: #8b2020;
+    color: #c84a4a;
+}
+
+.btnDanger:hover {
+    background: rgba(100, 20, 20, 0.6);
+    border-color: #c84a4a;
+    color: #f0aaaa;
+}
+
+.instructionsList {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 300px;
+}
+
+.instructionsList li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: #c8a85a;
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+}
+
+.key {
+    display: inline-block;
+    padding: 4px 10px;
+    border: 1px solid #6b5030;
+    background: rgba(255, 255, 255, 0.05);
+    color: #e8d5a3;
+    font-size: 0.75rem;
+    min-width: 70px;
+    text-align: center;
+    flex-shrink: 0;
+    border-radius: 3px;
+}

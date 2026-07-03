@@ -1,0 +1,85 @@
+.backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    background: rgba(10, 5, 2, 0.97);
+    border: 1px solid #6b5030;
+    padding: 48px 60px;
+    max-width: 500px;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.9);
+}
+
+.title {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: #e8d5a3;
+    letter-spacing: 0.2em;
+    text-align: center;
+}
+
+.playerName {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    color: #c8a85a;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+}
+
+.stats {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.statRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #3a2510;
+    padding-bottom: 8px;
+}
+
+.statLabel {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    color: #a89070;
+    letter-spacing: 0.1em;
+}
+
+.statValue {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #f0dcaa;
+}
+
+.btn {
+    padding: 12px 32px;
+    background: rgba(100, 70, 20, 0.5);
+    border: 1px solid #c8a85a;
+    color: #f0dcaa;
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-radius: 4px;
+}
+
+.btn:hover {
+    background: rgba(140, 100, 30, 0.7);
+}
