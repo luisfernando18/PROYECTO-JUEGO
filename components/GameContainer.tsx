@@ -15,8 +15,10 @@ export default function GameContainer() {
   const timeRef = useRef(0);
   const killsRef = useRef(0);
   const bossesRef = useRef(0);
+  const totalKillsRef = useRef(0); // contador acumulativo entre zonas
   const [showSummary, setShowSummary] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const currentSceneRef = useRef("Zone1Scene");
   const router = useRouter();
 
   const destroyPhaser = () => {
@@ -34,12 +36,11 @@ export default function GameContainer() {
       if (e.key === "Escape" && !showSummary) {
         setIsPaused((prev) => {
           const newPaused = !prev;
-          // Pausa o reanuda Phaser
           if (gameInstanceRef.current) {
             if (newPaused) {
-              gameInstanceRef.current.scene.pause("Zone1Scene");
+              gameInstanceRef.current.scene.pause(currentSceneRef.current);
             } else {
-              gameInstanceRef.current.scene.resume("Zone1Scene");
+              gameInstanceRef.current.scene.resume(currentSceneRef.current);
             }
           }
           return newPaused;
@@ -53,8 +54,25 @@ export default function GameContainer() {
 
   useEffect(() => {
     const onTime = (value: number) => { timeRef.current = value; };
-    const onKills = (value: number) => { killsRef.current = value; };
+
+    // Enemigos — acumula entre zonas
+    const onKills = (value: number) => {
+      killsRef.current = totalKillsRef.current + value;
+      gameEvents.emit("enemyKilledTotal", killsRef.current);
+    };
+
     const onBosses = (value: number) => { bossesRef.current = value; };
+
+    // Cuando cambia de zona, guarda el total actual y resetea el local
+    const onZoneChange = () => {
+      totalKillsRef.current = killsRef.current;
+    };
+
+    // Detecta qué escena está activa para pausar correctamente
+    const onSceneChange = (sceneName: string) => {
+      currentSceneRef.current = sceneName;
+      setIsPaused(false); //Asegura que la pausa se cierre al cambiar de zona
+    };
 
     const onPlayerDead = () => {
       saveSession({
@@ -83,6 +101,8 @@ export default function GameContainer() {
     gameEvents.on("timeElapsed", onTime);
     gameEvents.on("enemyKilled", onKills);
     gameEvents.on("bossDefeated", onBosses);
+    gameEvents.on("zoneCompleted", onZoneChange);
+    gameEvents.on("sceneChanged", onSceneChange);
     gameEvents.on("playerDead", onPlayerDead);
     gameEvents.on("playerWon", onPlayerWon);
 
@@ -90,6 +110,8 @@ export default function GameContainer() {
       gameEvents.off("timeElapsed", onTime);
       gameEvents.off("enemyKilled", onKills);
       gameEvents.off("bossDefeated", onBosses);
+      gameEvents.off("zoneCompleted", onZoneChange);
+      gameEvents.off("sceneChanged", onSceneChange);
       gameEvents.off("playerDead", onPlayerDead);
       gameEvents.off("playerWon", onPlayerWon);
     };
@@ -103,6 +125,7 @@ export default function GameContainer() {
 
       const Phaser = (await import("phaser")).default;
       const Zone1Scene = (await import("@/game/scenes/Zone1Scene")).default;
+      const Zone2Scene = (await import("@/game/scenes/Zone2Scene")).default;
 
       const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
@@ -120,7 +143,7 @@ export default function GameContainer() {
             debug: false,
           },
         },
-        scene: [Zone1Scene],
+        scene: [Zone1Scene, Zone2Scene],
       };
 
       gameInstanceRef.current = new Phaser.Game(config);
@@ -136,7 +159,7 @@ export default function GameContainer() {
   const handleResume = () => {
     setIsPaused(false);
     if (gameInstanceRef.current) {
-      gameInstanceRef.current.scene.resume("Zone1Scene");
+      gameInstanceRef.current.scene.resume(currentSceneRef.current);
     }
   };
 

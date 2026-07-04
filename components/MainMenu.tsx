@@ -194,7 +194,7 @@ export default function MainMenu() {
 
       {/* CRÉDITOS */}
       <div className={styles.credits}>
-        ©️ 2025 Proyecto Universitario <br /><br />ULEAM
+        © 2025 Proyecto Universitario <br /><br />ULEAM
       </div>
     </div>
   );

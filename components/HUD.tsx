@@ -20,22 +20,21 @@ export default function HUD() {
         const onZoneChange = (value: string) => setZoneName(value);
 
         gameEvents.on("hp", onHpChange);
-        gameEvents.on("enemyKilled", onEnemyKilled);
+        gameEvents.on("enemyKilledTotal", onEnemyKilled); // ← cambiado
         gameEvents.on("curas", onCuras);
         gameEvents.on("zone", onZoneChange);
 
-        // Inicia el timer
         timerRef.current = setInterval(() => {
             setTimeElapsed((prev) => {
                 const newTime = prev + 1;
-                gameEvents.emit("timeElapsed", newTime); // emite el tiempo para guardarlo
+                gameEvents.emit("timeElapsed", newTime);
                 return newTime;
             });
         }, 1000);
 
         return () => {
             gameEvents.off("hp", onHpChange);
-            gameEvents.off("enemyKilled", onEnemyKilled);
+            gameEvents.off("enemyKilledTotal", onEnemyKilled); // ← cambiado
             gameEvents.off("curas", onCuras);
             gameEvents.off("zone", onZoneChange);
             if (timerRef.current) clearInterval(timerRef.current);
@@ -46,10 +45,9 @@ export default function HUD() {
 
     const barColor =
         hpPercent > 60 ? "#f44336" :
-            hpPercent > 30 ? "#f44336" :
-                "#f44336";
+        hpPercent > 30 ? "#f44336" :
+        "#f44336";
 
-    // Formatea el tiempo como MM:SS
     const formatTime = (seconds: number) => {
         const m = Math.floor(seconds / 60).toString().padStart(2, "0");
         const s = (seconds % 60).toString().padStart(2, "0");
@@ -82,7 +80,6 @@ export default function HUD() {
                 <span className={styles.value}>{curas} / 5</span>
             </div>
 
-            {/* TIMER */}
             <div className={styles.stat}>
                 <span className={styles.label}>⏱ TIEMPO</span>
                 <span className={styles.value}>{formatTime(timeElapsed)}</span>

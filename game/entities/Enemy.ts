@@ -55,7 +55,7 @@ export default class Enemy {
 
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
     body.setSize(36, 50);
-    body.setOffset(14, 8);
+    body.setOffset(14, -2);
     body.setCollideWorldBounds(true);
 
     if (!this.scene.anims.exists("enemy-run")) {

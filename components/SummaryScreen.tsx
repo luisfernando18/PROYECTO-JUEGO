@@ -45,7 +45,7 @@ export default function SummaryScreen({ onRestart }: Props) {
                     </div>
                     <div className={styles.statRow}>
                         <span className={styles.statLabel}>Bosses derrotados</span>
-                        <span className={styles.statValue}>{session.bossesDefeated} / 2</span>
+                        <span className={styles.statValue}>{session.bossesDefeated} / 1</span>
                     </div>
                     <div className={styles.statRow}>
                         <span className={styles.statLabel}>Tiempo transcurrido</span>

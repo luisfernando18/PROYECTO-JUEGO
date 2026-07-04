@@ -45,25 +45,27 @@ export default class Zone1Scene extends Phaser.Scene {
     this.bgMusic.play();
 
     this.enemiesKilled = 0;
+    gameEvents.emit("sceneChanged", "Zone1Scene");
     gameEvents.emit("enemyKilled", this.enemiesKilled);
     gameEvents.emit("zone", "Selva Ancestral");
 
-    // Escucha cuando un enemigo muere
-    gameEvents.on("enemyDied", () => this.onEnemyDied());
-
-    // Cuando el jugador muere, detiene la música
-    gameEvents.on("playerDead", () => {
+    // Guardamos referencias a los listeners
+    const onEnemyDied = () => this.onEnemyDied();
+    const onPlayerDead = () => {
       try {
         if (this.bgMusic && this.bgMusic.isPlaying) {
           this.bgMusic.stop();
         }
-      } catch (e) { }
-    });
+      } catch (e) {}
+    };
 
-    // Limpia listeners cuando la escena se apaga
+    gameEvents.on("enemyDied", onEnemyDied);
+    gameEvents.on("playerDead", onPlayerDead);
+
+    // Elimina SOLO los listeners de esta escena
     this.events.on("shutdown", () => {
-      gameEvents.removeAllListeners("playerDead");
-      gameEvents.removeAllListeners("enemyDied");
+      gameEvents.off("enemyDied", onEnemyDied);
+      gameEvents.off("playerDead", onPlayerDead);
     });
 
     // CAPAS DE PARALLAX
@@ -90,7 +92,7 @@ export default class Zone1Scene extends Phaser.Scene {
       this.worldWidth, 275,
       "ground"
     ).setOrigin(0.5, 0.5)
-      .setTileScale(0.09, 0.12);
+     .setTileScale(0.10, 0.15);
     this.physics.add.existing(ground, true);
     this.platforms.add(ground);
 
@@ -103,19 +105,19 @@ export default class Zone1Scene extends Phaser.Scene {
     this.platforms.add(wallRight);
 
     const platData = [
-      { x: 500, y: H - 500 },
-      { x: 850, y: H - 320 },
-      { x: W + 200, y: H - 325 },
-      { x: W + 500, y: H - 520 },
-      { x: W + 900, y: H - 325 },
-      { x: W + 1200, y: H - 525 },
-      { x: this.worldWidth - 250, y: H - 325 },
+      { x: 500,                        y: H - 500 },
+      { x: 850,                        y: H - 320 },
+      { x: W + 200,                    y: H - 325 },
+      { x: W + 500,                    y: H - 520 },
+      { x: W + 900,                    y: H - 325 },
+      { x: W + 1200,                   y: H - 525 },
+      { x: this.worldWidth - 250,      y: H - 325 },
     ];
 
     platData.forEach(({ x, y }) => {
       const plat = this.add.tileSprite(x, y, 180, 50, "platform")
         .setOrigin(0.5, 0.5)
-        .setTileScale(0.09, 0.05);
+        .setTileScale(0.10, 0.10);
       this.physics.add.existing(plat, true);
       this.platforms.add(plat);
     });
@@ -126,18 +128,18 @@ export default class Zone1Scene extends Phaser.Scene {
 
     // ENEMIGOS
     const enemyData = [
-      { x: 600, y: H - 215, range: 150 },
-      { x: 850, y: H - 395, range: 80 },
-      { x: 1500, y: H - 215, range: 100 },
-      { x: W + 500, y: H - 720, range: 80 },
-      { x: W, y: H - 215, range: 80 },
-      { x: W + 600, y: H - 215, range: 200 },
-      { x: W + 800, y: H - 215, range: 200 },
-      { x: W + 1300, y: H - 215, range: 200 },
-      { x: 500, y: H - 585, range: 80 },
-      { x: W + 1200, y: H - 625, range: 80 },
-      { x: W + 900, y: H - 425, range: 80 },
-      { x: this.worldWidth - 250, y: H - 500, range: 80 },
+      { x: 600,                        y: H - 215, range: 150 },
+      { x: 850,                        y: H - 395, range: 80  },
+      { x: 1500,                       y: H - 215, range: 100 },
+      { x: W + 500,                    y: H - 720, range: 80  },
+      { x: W,                          y: H - 215, range: 80  },
+      { x: W + 600,                    y: H - 215, range: 200 },
+      { x: W + 800,                    y: H - 215, range: 200 },
+      { x: W + 1300,                   y: H - 215, range: 200 },
+      { x: 500,                        y: H - 585, range: 80  },
+      { x: W + 1200,                   y: H - 625, range: 80  },
+      { x: W + 900,                    y: H - 425, range: 80  },
+      { x: this.worldWidth - 250,      y: H - 500, range: 80  },
     ];
 
     enemyData.forEach(({ x, y, range }) => {
@@ -163,26 +165,24 @@ export default class Zone1Scene extends Phaser.Scene {
           if (this.bgMusic && this.bgMusic.isPlaying) {
             this.bgMusic.stop();
           }
-        } catch (e) { }
+        } catch (e) {}
+        gameEvents.emit("zoneCompleted");
+        gameEvents.emit("sceneChanged", "Zone2Scene");
         this.scene.start("Zone2Scene");
       });
     }
   }
 
   update() {
-    // PARALLAX
     const camX = this.cameras.main.scrollX;
     this.bgSky.tilePositionX = camX * 0.1;
     this.bgMid.tilePositionX = camX * 0.3;
     this.bgFront.tilePositionX = camX * 0.6;
 
-    // ACTUALIZA EL JUGADOR
     this.player.update();
 
-    // ACTUALIZA ENEMIGOS Y DETECTA GOLPES DEL JUGADOR
     const hitbox = this.player.getAttackHitbox();
 
-    // Resetea el hitbox fuera del forEach
     if (!hitbox) {
       this.hasHitThisAttack = false;
     }

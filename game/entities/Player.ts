@@ -58,7 +58,7 @@ export default class Player {
     this.sprite.setScale(2.2);
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
     body.setSize(40, 50);
-    body.setOffset(12, 6);
+    body.setOffset(12, -2);
     body.setCollideWorldBounds(true);
 
     this.scene.anims.create({
