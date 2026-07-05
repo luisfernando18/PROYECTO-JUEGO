@@ -34,11 +34,10 @@ export default function PauseOverlay({ onResume, onMainMenu }: Props) {
                     <ul className={styles.instructionsList}>
                         <li><span className={styles.key}>A / ←</span> Moverse a la izquierda</li>
                         <li><span className={styles.key}>D / →</span> Moverse a la derecha</li>
-                        <li><span className={styles.key}>SPACE / X</span> Saltar</li>
-                        <li><span className={styles.key}>F / Clic Izquierdo / ▢</span> Atacar</li>
-                        <li><span className={styles.key}>Q / △</span> Usar cura</li>
-                        <li><span className={styles.key}>ESC / ►</span> Pausar / Reanudar</li>
-                        <li><span className={styles.key}>Mando</span> D-pad + botones A/B</li>
+                        <li><span className={styles.key}>SPACE</span> Saltar</li>
+                        <li><span className={styles.key}>F / Clic Izquierdo</span> Atacar</li>
+                        <li><span className={styles.key}>Q</span> Usar cura</li>
+                        <li><span className={styles.key}>ESC</span> Pausar / Reanudar</li>
                     </ul>
                     <button className={styles.btn} onClick={() => setShowInstructions(false)}>
                         ← Volver

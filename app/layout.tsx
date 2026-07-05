@@ -8,8 +8,8 @@ const cinzel = Cinzel({
 });
 
 export const metadata: Metadata = {
-  title: "Nombre de tu juego",
-  description: "Plataformero 2D inspirado en la cultura ecuatoriana",
+  title: "The Last Breath: Shadow of The Condor",
+  description: "Plataformero 2D inspirado en leyendas ecuatorianas",
 };
 
 export default function RootLayout({

@@ -126,6 +126,7 @@ export default function GameContainer() {
       const Phaser = (await import("phaser")).default;
       const Zone1Scene = (await import("@/game/scenes/Zone1Scene")).default;
       const Zone2Scene = (await import("@/game/scenes/Zone2Scene")).default;
+      const BossScene = (await import("@/game/scenes/BossScene")).default;
 
       const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
@@ -143,7 +144,7 @@ export default function GameContainer() {
             debug: false,
           },
         },
-        scene: [Zone1Scene, Zone2Scene],
+        scene: [Zone1Scene, Zone2Scene, BossScene],
       };
 
       gameInstanceRef.current = new Phaser.Game(config);

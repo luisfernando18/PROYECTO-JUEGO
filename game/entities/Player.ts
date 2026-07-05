@@ -4,7 +4,6 @@ import gameEvents from "@/lib/gameEvents";
 export default class Player {
   private scene: Phaser.Scene;
   public sprite!: Phaser.Physics.Arcade.Sprite;
-  private attackHitbox!: Phaser.GameObjects.Zone;
 
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: {
@@ -21,6 +20,13 @@ export default class Player {
   private maxHp!: number;
   private curas!: number;
   private isAttacking!: boolean;
+  private isDead!: boolean;
+  private isFrozen: boolean = false;
+
+  private soundRun!: Phaser.Sound.BaseSound;
+  private soundJump!: Phaser.Sound.BaseSound;
+  private soundAttack!: Phaser.Sound.BaseSound;
+  private soundDeath!: Phaser.Sound.BaseSound;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -43,6 +49,11 @@ export default class Player {
       frameWidth: 64,
       frameHeight: 64,
     });
+
+    scene.load.audio("player-run", "/assets/audio/Player/Player-correr.mp3");
+    scene.load.audio("player-jump", "/assets/audio/Player/Player-salto.mp3");
+    scene.load.audio("player-attack", "/assets/audio/Player/Player-ataque.mp3");
+    scene.load.audio("player-death", "/assets/audio/Player/Player-muerte1.mp3");
   }
 
   create(x: number, y: number, platforms: Phaser.Physics.Arcade.StaticGroup) {
@@ -50,6 +61,8 @@ export default class Player {
     this.maxHp = 100;
     this.curas = 5;
     this.isAttacking = false;
+    this.isDead = false;
+    this.isFrozen = false;
 
     gameEvents.emit("hp", this.hp);
     gameEvents.emit("curas", this.curas);
@@ -105,17 +118,26 @@ export default class Player {
     this.attackKey = this.scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.F);
 
     this.scene.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
-      if (pointer.leftButtonDown() && !this.isAttacking) {
+      if (pointer.leftButtonDown() && !this.isAttacking && !this.isDead && !this.isFrozen) {
         this.isAttacking = true;
+        this.soundAttack.play();
         this.sprite.play("attack");
         this.sprite.once("animationcomplete", () => {
           this.isAttacking = false;
         });
       }
     });
+
+    // SONIDOS
+    this.soundRun = this.scene.sound.add("player-run", { loop: true, volume: 0.4 });
+    this.soundJump = this.scene.sound.add("player-jump", { volume: 1 });
+    this.soundAttack = this.scene.sound.add("player-attack", { volume: 0.6 });
+    this.soundDeath = this.scene.sound.add("player-death", { volume: 0.7 });
   }
 
   update() {
+    if (this.isDead || this.isFrozen) return;
+
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
     const onGround = body.blocked.down;
 
@@ -137,6 +159,7 @@ export default class Player {
 
     if (Phaser.Input.Keyboard.JustDown(this.attackKey) && !this.isAttacking) {
       this.isAttacking = true;
+      this.soundAttack.play();
       this.sprite.play("attack");
       this.sprite.once("animationcomplete", () => {
         this.isAttacking = false;
@@ -147,10 +170,13 @@ export default class Player {
       if (goLeft) body.setVelocityX(-200);
       else if (goRight) body.setVelocityX(200);
       else body.setVelocityX(0);
+      if ((this.soundRun as any).isPlaying) this.soundRun.stop();
       return;
     }
 
     if (!onGround) {
+      if ((this.soundRun as any).isPlaying) this.soundRun.stop();
+
       if (goLeft) {
         body.setVelocityX(-450);
         this.sprite.setFlipX(true);
@@ -172,6 +198,8 @@ export default class Player {
 
     if (jump) {
       body.setVelocityY(-1000);
+      this.soundJump.play();
+      if ((this.soundRun as any).isPlaying) this.soundRun.stop();
       this.sprite.play("jump", true);
       return;
     }
@@ -180,26 +208,50 @@ export default class Player {
       body.setVelocityX(-450);
       this.sprite.setFlipX(true);
       this.sprite.play("run", true);
+      if (!(this.soundRun as any).isPlaying) this.soundRun.play();
     } else if (goRight) {
       body.setVelocityX(450);
       this.sprite.setFlipX(false);
       this.sprite.play("run", true);
+      if (!(this.soundRun as any).isPlaying) this.soundRun.play();
     } else {
       body.setVelocityX(0);
       this.sprite.play("idle", true);
+      if ((this.soundRun as any).isPlaying) this.soundRun.stop();
     }
   }
 
   takeDamage(amount: number) {
+    if (this.isDead || this.isFrozen) return false;
+
     this.hp -= amount;
     if (this.hp < 0) this.hp = 0;
     gameEvents.emit("hp", this.hp);
 
     if (this.hp <= 0) {
-      gameEvents.emit("playerDead");
+      this.isDead = true;
+      try {
+        if ((this.soundRun as any).isPlaying) this.soundRun.stop();
+        if ((this.soundAttack as any).isPlaying) this.soundAttack.stop();
+      } catch (e) {}
+      this.soundDeath.play();
+      this.scene.time.delayedCall(800, () => {
+        gameEvents.emit("playerDead");
+      });
     }
 
     return this.hp <= 0;
+  }
+
+  freeze() {
+    this.isFrozen = true;
+    try {
+      if ((this.soundRun as any).isPlaying) this.soundRun.stop();
+      if ((this.soundAttack as any).isPlaying) this.soundAttack.stop();
+    } catch (e) {}
+    const body = this.sprite.body as Phaser.Physics.Arcade.Body;
+    body.setVelocity(0, 0);
+    this.sprite.play("idle", true);
   }
 
   getSprite() {
@@ -210,7 +262,6 @@ export default class Player {
     return this.isAttacking;
   }
 
-  // Hitbox temporal de ataque — se usa para detectar colisión con enemigos
   getAttackHitbox(): { x: number; y: number; width: number; height: number } | null {
     if (!this.isAttacking) return null;
 

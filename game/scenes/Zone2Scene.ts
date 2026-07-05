@@ -26,6 +26,7 @@ export default class Zone2Scene extends Phaser.Scene {
     this.load.image("bg-mid-2", "/assets/sprites/zone2/Medio - zona2.png");
     this.load.image("bg-front-2", "/assets/sprites/zone2/Frente - zona2.png");
     this.load.image("ground-2", "/assets/sprites/zone2/Suelo - zona2.png");
+    this.load.audio("zone2-music", "/assets/audio/Peldaños Hacia la Santidad.mp3");
 
     Player.preload(this);
     Enemy.preload(this);
@@ -42,6 +43,11 @@ export default class Zone2Scene extends Phaser.Scene {
 
     gameEvents.emit("sceneChanged", "Zone2Scene");
     gameEvents.emit("zone", "Cuevas Profundas");
+
+    // MÚSICA DE FONDO
+    this.bgMusic = this.sound.add("zone2-music", { loop: true, volume: 0.5 });
+    this.bgMusic.play();
+    
     // NO emitimos enemyKilled al inicio para no resetear el contador acumulativo
 
     // Guardamos referencias a los listeners para eliminar solo los de esta escena
@@ -152,6 +158,7 @@ export default class Zone2Scene extends Phaser.Scene {
     gameEvents.emit("enemyKilled", this.enemiesKilled);
 
     if (this.enemiesKilled >= this.totalEnemies) {
+      this.player.freeze();
       this.time.delayedCall(2000, () => {
         try {
           if (this.bgMusic && this.bgMusic.isPlaying) {
@@ -159,8 +166,8 @@ export default class Zone2Scene extends Phaser.Scene {
           }
         } catch (e) {}
         gameEvents.emit("zoneCompleted");
-        gameEvents.emit("sceneChanged", "Boss1Scene");
-        this.scene.start("Boss1Scene");
+        gameEvents.emit("sceneChanged", "BossScene");
+        this.scene.start("BossScene");
       });
     }
   }

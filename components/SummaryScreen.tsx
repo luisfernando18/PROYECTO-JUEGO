@@ -20,6 +20,20 @@ export default function SummaryScreen({ onRestart }: Props) {
     useEffect(() => {
         const data = loadSession();
         if (data) setSession(data);
+
+        //SE REPRODUCE UN SONIDO DEPENDIENDO SI MUERE O GANA EL JUGADOR
+        const audioFile = data?.won
+            ? "/assets/audio/Victoria.mp3"
+            : "/assets/audio/Muerte.mp3";
+
+        const audio = new Audio(audioFile);
+        audio.volume = 0.7;
+        audio.play().catch(() => {}); //POR SI SE BLOQUEA EL NAVEGADOR
+
+        return () => {
+            audio.pause();
+            audio.currentTime = 0;
+        };
     }, []);
 
     const formatTime = (seconds: number) => {
@@ -33,10 +47,10 @@ export default function SummaryScreen({ onRestart }: Props) {
             <div className={styles.container}>
 
                 <h1 className={styles.title}>
-                    {session.won ? " VICTORIA " : " HAS MUERTO "}
+                    {session.won ? " HAS DERROTADO AL DIABLO " : " HAS MUERTO "}
                 </h1>
 
-                <p className={styles.playerName}>{session.playerName}</p>
+                <p className={styles.playerName}>Nombre del jugador: {session.playerName}</p>
 
                 <div className={styles.stats}>
                     <div className={styles.statRow}>

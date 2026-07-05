@@ -160,10 +160,11 @@ export default class Zone1Scene extends Phaser.Scene {
     gameEvents.emit("enemyKilled", this.enemiesKilled);
 
     if (this.enemiesKilled >= this.totalEnemies) {
+      this.player.freeze();
       this.time.delayedCall(2000, () => {
         try {
           if (this.bgMusic && this.bgMusic.isPlaying) {
-            this.bgMusic.stop();
+            this.bgMusic.stop();         
           }
         } catch (e) {}
         gameEvents.emit("zoneCompleted");

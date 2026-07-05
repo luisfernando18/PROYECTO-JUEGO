@@ -16,15 +16,21 @@ export default class Enemy {
   protected hp: number = 5;
   protected speed: number = 80;
   protected chaseSpeed: number = 140;
-  protected detectionRange: number = 220;
+  protected detectionRange: number = 320;
+  protected attackRange: number = 120; // rango para activar el ataque
   protected damage: number = 10;
 
   protected direction: 1 | -1 = 1;
   protected isDead: boolean = false;
   protected isChasing: boolean = false;
   protected isKnockedBack: boolean = false;
-  protected lastDamageTime: number = 0;
-  protected damageCooldown: number = 800;
+  protected isAttacking: boolean = false;
+  protected lastAttackTime: number = 0;
+  protected attackCooldown: number = 1500;
+
+  protected soundWalk!: Phaser.Sound.BaseSound;
+  protected soundAttack!: Phaser.Sound.BaseSound;
+  protected soundDeath!: Phaser.Sound.BaseSound;
 
   constructor(
     scene: Phaser.Scene,
@@ -47,6 +53,15 @@ export default class Enemy {
       frameWidth: 64,
       frameHeight: 64,
     });
+    scene.load.spritesheet("enemy-attack", "/assets/sprites/enemy/ataque oso.png", {
+      frameWidth: 64,
+      frameHeight: 64,
+    });
+
+    //SONIDOS
+    scene.load.audio("enemy-walk", "/assets/audio/Enemy/Enemy-caminando.mp3");
+    scene.load.audio("enemy-attack", "/assets/audio/Enemy/Enemy-atacar1.mp3");
+    scene.load.audio("enemy-death", "/assets/audio/Enemy/Enemy-muerte1.mp3");
   }
 
   create() {
@@ -67,22 +82,30 @@ export default class Enemy {
       });
     }
 
+    if (!this.scene.anims.exists("enemy-attack")) {
+      this.scene.anims.create({
+        key: "enemy-attack",
+        frames: this.scene.anims.generateFrameNumbers("enemy-attack", { start: 0, end: 2 }),
+        frameRate: 9,
+        repeat: 0, // se reproduce una sola vez
+      });
+    }
+
     this.sprite.play("enemy-run");
 
     this.scene.physics.add.collider(this.sprite, this.platforms);
 
-    this.scene.physics.add.overlap(
-      this.sprite,
-      this.player.getSprite(),
-      () => this.onPlayerContact(),
-      undefined,
-      this
-    );
+    // Ya no hay overlap de daño por contacto
+
+    this.soundWalk = this.scene.sound.add("enemy-walk", { loop: true, volume: 0.3 });
+    this.soundAttack = this.scene.sound.add("enemy-attack", { volume: 0.5 });
+    this.soundDeath = this.scene.sound.add("enemy-death", { volume: 0.5 });
   }
 
   update() {
     if (this.isDead) return;
-    if (this.isKnockedBack) return; // pausa el comportamiento mientras es empujado
+    if (this.isKnockedBack) return;
+    if (this.isAttacking) return; // no se mueve mientras ataca
 
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
     const playerSprite = this.player.getSprite();
@@ -92,6 +115,18 @@ export default class Enemy {
     );
 
     this.isChasing = distanceToPlayer <= this.detectionRange;
+
+    // Si el jugador está dentro del rango de ataque, ataca
+    if (this.isChasing && distanceToPlayer <= this.attackRange) {
+      const now = this.scene.time.now;
+      if (now - this.lastAttackTime >= this.attackCooldown) {
+        this.performAttack();
+        return;
+      }
+      // Si está en rango pero en cooldown, se queda quieto esperando
+      body.setVelocityX(0);
+      return;
+    }
 
     if (this.isChasing) {
       const nextDirection = playerSprite.x < this.sprite.x ? -1 : 1;
@@ -117,6 +152,43 @@ export default class Enemy {
     if (!this.sprite.anims.isPlaying || this.sprite.anims.currentAnim?.key !== "enemy-run") {
       this.sprite.play("enemy-run", true);
     }
+
+    if (body.velocity.x !== 0) {
+      if (!this.soundWalk.isPlaying) this.soundWalk.play();
+    } else {
+      if (this.soundWalk.isPlaying) this.soundWalk.stop();
+    }
+  }
+
+  protected performAttack() {
+    this.isAttacking = true;
+    this.soundAttack.play();
+    this.lastAttackTime = this.scene.time.now;
+
+    const body = this.sprite.body as Phaser.Physics.Arcade.Body;
+    body.setVelocityX(0);
+
+    // Mira hacia el jugador antes de atacar
+    const playerX = this.player.getSprite().x;
+    this.sprite.setFlipX(this.sprite.x > playerX);
+
+    this.sprite.play("enemy-attack");
+    this.sprite.once("animationcomplete", () => {
+      if (this.isDead) return;
+
+      // Verifica que el jugador siga en rango antes de hacer daño
+      const distanceToPlayer = Phaser.Math.Distance.Between(
+        this.sprite.x, this.sprite.y,
+        this.player.getSprite().x, this.player.getSprite().y
+      );
+
+      if (distanceToPlayer <= this.attackRange) {
+        this.player.takeDamage(this.damage);
+      }
+
+      this.isAttacking = false;
+      this.sprite.play("enemy-run", true);
+    });
   }
 
   protected checkGroundAhead(direction: 1 | -1): boolean {
@@ -148,13 +220,11 @@ export default class Enemy {
 
     this.hp--;
 
-    // Flash rojo
     this.sprite.setTint(0xff0000);
     this.scene.time.delayedCall(150, () => {
       if (!this.isDead) this.sprite.clearTint();
     });
 
-    // Tambaleo al recibir un golpe
     this.scene.tweens.add({
       targets: this.sprite,
       scaleX: 2.35,
@@ -164,24 +234,22 @@ export default class Enemy {
       repeat: 5,
       ease: "Sine.easeInOut",
       onComplete: () => {
-        this.sprite.setScale(2); // vuelve al tamaño original
+        this.sprite.setScale(2);
       }
     });
 
-    // Empuje hacia atrás
     const playerX = this.player.getSprite().x;
     const knockbackDirection = this.sprite.x > playerX ? 1 : -1;
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
 
     this.isKnockedBack = true;
+    this.isAttacking = false; // cancela el ataque si estaba atacando
     body.setVelocityX(550 * knockbackDirection);
 
-    // Para el empuje después de 250ms
     this.scene.time.delayedCall(250, () => {
       if (!this.isDead) body.setVelocityX(0);
     });
 
-    // Retoma el control después de 1s
     this.scene.time.delayedCall(1000, () => {
       if (!this.isDead) this.isKnockedBack = false;
     });
@@ -193,6 +261,8 @@ export default class Enemy {
 
   protected die() {
     this.isDead = true;
+    this.soundWalk.stop();
+    this.soundDeath.play();
 
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
     body.setVelocity(0, 0);
@@ -208,16 +278,6 @@ export default class Enemy {
     });
 
     gameEvents.emit("enemyDied");
-  }
-
-  protected onPlayerContact() {
-    if (this.isDead) return;
-
-    const now = this.scene.time.now;
-    if (now - this.lastDamageTime < this.damageCooldown) return;
-
-    this.lastDamageTime = now;
-    this.player.takeDamage(this.damage);
   }
 
   getSprite() {

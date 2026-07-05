@@ -24,7 +24,7 @@ export default function MainMenu() {
     }
     if (musicRef.current) {
       // CORRECCIÓN: El volumen estaba en 0. Lo ajustamos a 0.5 (50%) o 1 (100%).
-      musicRef.current.volume = 0.5;
+      musicRef.current.volume = 0.25;
 
       // Manejo de la promesa de play() para evitar errores en consola si el navegador bloquea el autoplay
       musicRef.current.play().catch((err) => console.log("Interacción requerida para el audio", err));
@@ -104,14 +104,14 @@ export default function MainMenu() {
       </video>
 
       <audio ref={musicRef} loop>
-        <source src="/assets/audio/Audio.mp3" type="audio/mpeg" />
+        <source src="/assets/audio/The Last Faith - Beauty Dwelt Here Once - Original Soundtrack _ OST.mp3" type="audio/mpeg" />
       </audio>
 
       <div className={styles.overlay} onClick={handleUnmute} />
 
       <div className={styles.menuContent}>
-        <h1 className={styles.title}>NOMBRE DEL JUEGO</h1>
-        <p className={styles.subtitle}>Una leyenda de los Andes</p>
+        <h1 className={styles.title}>The Last Breath</h1>
+        <p className={styles.subtitle}>Shadow of The Condor</p>
 
         <div className={styles.buttons}>
           <button
@@ -177,13 +177,12 @@ export default function MainMenu() {
           <div className={styles.modal}>
             <h2 className={styles.modalTitle}>INSTRUCCIONES</h2>
             <ul className={styles.instructionsList}>
-              <li><span className={styles.key}>X / Barra Espaciadora</span> Saltar</li>
+              <li><span className={styles.key}>Barra Espaciadora</span> Saltar</li>
               <li><span className={styles.key}>A / ←</span> Moverse a la izquierda</li>
               <li><span className={styles.key}>D / →</span> Moverse a la derecha</li>
-              <li><span className={styles.key}>▢ / Clic Izquierdo / F</span> Atacar</li>
-              <li><span className={styles.key}>△ / Q</span> Usar cura</li>
-              <li><span className={styles.key}>ESC / ►</span> Pausar / Reanudar</li>
-              <li><span className={styles.key}>Mando</span> D-pad + botones A/B</li>
+              <li><span className={styles.key}>Clic Izquierdo / F</span> Atacar</li>
+              <li><span className={styles.key}>Q</span> Usar cura</li>
+              <li><span className={styles.key}>ESC</span> Pausar / Reanudar</li>
             </ul>
             <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setShowInstructions(false)}>
               Entendido
@@ -194,7 +193,7 @@ export default function MainMenu() {
 
       {/* CRÉDITOS */}
       <div className={styles.credits}>
-        © 2025 Proyecto Universitario <br /><br />ULEAM
+        © 2025 ULEAM <br/><br/>Proyecto Universitario <br /><br /> Carrera de <br/>Tecnologias de la información <br/><br />ULEAM 
       </div>
     </div>
   );
