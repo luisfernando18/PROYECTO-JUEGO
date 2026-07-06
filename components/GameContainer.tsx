@@ -15,7 +15,7 @@ export default function GameContainer() {
   const timeRef = useRef(0);
   const killsRef = useRef(0);
   const bossesRef = useRef(0);
-  const totalKillsRef = useRef(0); // contador acumulativo entre zonas
+  const totalKillsRef = useRef(0);
   const [showSummary, setShowSummary] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const currentSceneRef = useRef("Zone1Scene");
@@ -30,32 +30,53 @@ export default function GameContainer() {
     }
   };
 
-  // Listener de ESC para pausar/reanudar
+  // Solo pausa — no despausa
+  const pauseGame = () => {
+    if (showSummary || isPaused) return;
+    setIsPaused(true);
+    if (gameInstanceRef.current) {
+      gameInstanceRef.current.scene.pause(currentSceneRef.current);
+    }
+  };
+
+  // Solo reanuda — no pausa
+  const resumeGame = () => {
+    setIsPaused(false);
+    if (gameInstanceRef.current) {
+      gameInstanceRef.current.scene.resume(currentSceneRef.current);
+    }
+  };
+
+  // ESC alterna pausa/reanudar desde teclado
+  const togglePause = () => {
+    if (showSummary) return;
+    if (isPaused) {
+      resumeGame();
+    } else {
+      pauseGame();
+    }
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !showSummary) {
-        setIsPaused((prev) => {
-          const newPaused = !prev;
-          if (gameInstanceRef.current) {
-            if (newPaused) {
-              gameInstanceRef.current.scene.pause(currentSceneRef.current);
-            } else {
-              gameInstanceRef.current.scene.resume(currentSceneRef.current);
-            }
-          }
-          return newPaused;
-        });
-      }
+      if (e.key === "Escape") togglePause();
     };
 
+    // Start del mando — solo pausa
+    const onGamepadPause = () => pauseGame();
+
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [showSummary]);
+    gameEvents.on("gamepadPause", onGamepadPause);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      gameEvents.off("gamepadPause", onGamepadPause);
+    };
+  }, [showSummary, isPaused]);
 
   useEffect(() => {
     const onTime = (value: number) => { timeRef.current = value; };
 
-    // Enemigos — acumula entre zonas
     const onKills = (value: number) => {
       killsRef.current = totalKillsRef.current + value;
       gameEvents.emit("enemyKilledTotal", killsRef.current);
@@ -63,15 +84,13 @@ export default function GameContainer() {
 
     const onBosses = (value: number) => { bossesRef.current = value; };
 
-    // Cuando cambia de zona, guarda el total actual y resetea el local
     const onZoneChange = () => {
       totalKillsRef.current = killsRef.current;
     };
 
-    // Detecta qué escena está activa para pausar correctamente
     const onSceneChange = (sceneName: string) => {
       currentSceneRef.current = sceneName;
-      setIsPaused(false); //Asegura que la pausa se cierre al cambiar de zona
+      setIsPaused(false);
     };
 
     const onPlayerDead = () => {
@@ -137,6 +156,9 @@ export default function GameContainer() {
           width: "100%",
           height: "100%",
         },
+        input: {
+          gamepad: true,
+        },
         physics: {
           default: "arcade",
           arcade: {
@@ -157,33 +179,17 @@ export default function GameContainer() {
     };
   }, []);
 
-  const handleResume = () => {
-    setIsPaused(false);
-    if (gameInstanceRef.current) {
-      gameInstanceRef.current.scene.resume(currentSceneRef.current);
-    }
-  };
-
-  const handleMainMenu = () => {
-    destroyPhaser();
-    router.push("/");
-  };
-
-  const handleRestart = () => {
-    router.push("/");
-  };
-
   return (
     <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
       <div ref={gameRef} style={{ width: "100%", height: "100%", overflow: "hidden" }} />
       <HUD />
       {isPaused && !showSummary && (
         <PauseOverlay
-          onResume={handleResume}
-          onMainMenu={handleMainMenu}
+          onResume={resumeGame}
+          onMainMenu={() => { destroyPhaser(); router.push("/"); }}
         />
       )}
-      {showSummary && <SummaryScreen onRestart={handleRestart} />}
+      {showSummary && <SummaryScreen onRestart={() => router.push("/")} />}
     </div>
   );
 }

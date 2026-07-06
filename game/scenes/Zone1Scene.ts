@@ -56,7 +56,7 @@ export default class Zone1Scene extends Phaser.Scene {
         if (this.bgMusic && this.bgMusic.isPlaying) {
           this.bgMusic.stop();
         }
-      } catch (e) {}
+      } catch (e) { }
     };
 
     gameEvents.on("enemyDied", onEnemyDied);
@@ -75,12 +75,12 @@ export default class Zone1Scene extends Phaser.Scene {
       .setScrollFactor(0);
 
     this.bgMid = this.add
-      .tileSprite(0, 135, this.worldWidth, H, "bg-mid")
+      .tileSprite(0, 260, this.worldWidth, H, "bg-mid")
       .setOrigin(0, 0)
       .setScrollFactor(0);
 
     this.bgFront = this.add
-      .tileSprite(0, -745, this.worldWidth, H + 1000, "bg-front")
+      .tileSprite(0, -620, this.worldWidth, H + 1000, "bg-front")
       .setOrigin(0, 0)
       .setScrollFactor(0);
 
@@ -92,7 +92,7 @@ export default class Zone1Scene extends Phaser.Scene {
       this.worldWidth, 275,
       "ground"
     ).setOrigin(0.5, 0.5)
-     .setTileScale(0.10, 0.15);
+      .setTileScale(0.10, 0.15);
     this.physics.add.existing(ground, true);
     this.platforms.add(ground);
 
@@ -105,13 +105,13 @@ export default class Zone1Scene extends Phaser.Scene {
     this.platforms.add(wallRight);
 
     const platData = [
-      { x: 500,                        y: H - 500 },
-      { x: 850,                        y: H - 320 },
-      { x: W + 200,                    y: H - 325 },
-      { x: W + 500,                    y: H - 520 },
-      { x: W + 900,                    y: H - 325 },
-      { x: W + 1200,                   y: H - 525 },
-      { x: this.worldWidth - 250,      y: H - 325 },
+      { x: 500, y: H - 500 },
+      { x: 850, y: H - 320 },
+      { x: W + 200, y: H - 325 },
+      { x: W + 500, y: H - 520 },
+      { x: W + 900, y: H - 325 },
+      { x: W + 1200, y: H - 525 },
+      { x: this.worldWidth - 250, y: H - 325 },
     ];
 
     platData.forEach(({ x, y }) => {
@@ -128,18 +128,18 @@ export default class Zone1Scene extends Phaser.Scene {
 
     // ENEMIGOS
     const enemyData = [
-      { x: 600,                        y: H - 215, range: 150 },
-      { x: 850,                        y: H - 395, range: 80  },
-      { x: 1500,                       y: H - 215, range: 100 },
-      { x: W + 500,                    y: H - 720, range: 80  },
-      { x: W,                          y: H - 215, range: 80  },
-      { x: W + 600,                    y: H - 215, range: 200 },
-      { x: W + 800,                    y: H - 215, range: 200 },
-      { x: W + 1300,                   y: H - 215, range: 200 },
-      { x: 500,                        y: H - 585, range: 80  },
-      { x: W + 1200,                   y: H - 625, range: 80  },
-      { x: W + 900,                    y: H - 425, range: 80  },
-      { x: this.worldWidth - 250,      y: H - 500, range: 80  },
+      { x: 600, y: H - 215, range: 150 },
+      { x: 850, y: H - 395, range: 80 },
+      { x: 1500, y: H - 215, range: 100 },
+      { x: W + 500, y: H - 720, range: 80 },
+      { x: W, y: H - 215, range: 80 },
+      { x: W + 600, y: H - 215, range: 200 },
+      { x: W + 800, y: H - 215, range: 200 },
+      { x: W + 1300, y: H - 215, range: 200 },
+      { x: 500, y: H - 585, range: 80 },
+      { x: W + 1200, y: H - 625, range: 80 },
+      { x: W + 900, y: H - 425, range: 80 },
+      { x: this.worldWidth - 250, y: H - 500, range: 80 },
     ];
 
     enemyData.forEach(({ x, y, range }) => {
@@ -164,9 +164,9 @@ export default class Zone1Scene extends Phaser.Scene {
       this.time.delayedCall(2000, () => {
         try {
           if (this.bgMusic && this.bgMusic.isPlaying) {
-            this.bgMusic.stop();         
+            this.bgMusic.stop();
           }
-        } catch (e) {}
+        } catch (e) { }
         gameEvents.emit("zoneCompleted");
         gameEvents.emit("sceneChanged", "Zone2Scene");
         this.scene.start("Zone2Scene");

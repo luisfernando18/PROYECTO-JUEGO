@@ -93,3 +93,23 @@
     flex-shrink: 0;
     border-radius: 3px;
 }
+
+.btnFocused {
+    background: rgba(140, 100, 30, 0.7);
+    border-color: #f0dcaa;
+    color: #f0dcaa;
+}
+
+.btnPrimary {
+    background: rgba(100, 70, 20, 0.5);
+    border-color: #c8a85a;
+    color: #f0dcaa;
+}
+
+.hint {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    color: #6b5030;
+    letter-spacing: 0.1em;
+    margin-top: 8px;
+}
