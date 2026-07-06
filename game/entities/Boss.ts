@@ -19,11 +19,11 @@ export default class Boss {
   private damageCooldown: number = 800;
 
   private normalAttackTimer: number = 0;
-  private normalAttackInterval: number = 2000;
-  private normalAttackDamage: number = 20;
+  private normalAttackInterval: number = 2000; //TIEMPO ENTRE ATAQUES NORMALES
+  private normalAttackDamage: number = 20; //DAÑO DE ATAQUE NORMAL
 
   private sweepTimer: number = 0;
-  private sweepInterval: number = 15000;
+  private sweepInterval: number = 15000; //TIEMPO ENTRE ATAQUES DE BARRIDO
   private sweepTargetX: number = 0;
 
   private hpBarBg!: Phaser.GameObjects.Rectangle;
@@ -124,7 +124,7 @@ export default class Boss {
     }
     if (this.sprite.anims.currentAnim?.key !== "boss-float") this.sprite.play("boss-float", true);
   }
-
+  //ATAQUE NORMAL
   private performNormalAttack() {
     this.state = "attacking";
     this.soundFloat.stop();
@@ -147,7 +147,7 @@ export default class Boss {
       this.soundFloat.play();
     });
   }
-
+  //COMIENZA EL BARRIDO
   private startSweep() {
     this.state = "preparing_sweep";
     this.soundSweep.play();
@@ -178,7 +178,7 @@ export default class Boss {
       },
     });
   }
-
+  //ATAQUE DE BARRIDO
   private performSweep(body: Phaser.Physics.Arcade.Body) {
     if (!body.enable) return;
     const dx = this.sweepTargetX - this.sprite.x;
@@ -193,7 +193,7 @@ export default class Boss {
         const dist = Phaser.Math.Distance.Between(this.sprite.x, this.sprite.y, playerSprite.x, playerSprite.y);
         if (dist < 80) {
           this.lastDamageTime = now;
-          this.player.takeDamage(40);
+          this.player.takeDamage(40); //DAÑO DE BARRIDO
         }
       }
     } else {

@@ -13,12 +13,12 @@ export default class Enemy {
   protected spawnY: number;
   protected patrolRange: number;
 
-  protected hp: number = 5;
+  protected hp: number = 5; //NUMERO DE ATAQUES QUE NECESITA EL ENEMIGO PARA MORIR
   protected speed: number = 80;
   protected chaseSpeed: number = 140;
   protected detectionRange: number = 320;
   protected attackRange: number = 120; // rango para activar el ataque
-  protected damage: number = 10;
+  protected damage: number = 10; //DAÑO DE ATAQUE
 
   protected direction: 1 | -1 = 1;
   protected isDead: boolean = false;
@@ -159,7 +159,7 @@ export default class Enemy {
       if (this.soundWalk.isPlaying) this.soundWalk.stop();
     }
   }
-
+  //ATAQUE DEL ENEMIGO
   protected performAttack() {
     this.isAttacking = true;
     this.soundAttack.play();
@@ -190,7 +190,7 @@ export default class Enemy {
       this.sprite.play("enemy-run", true);
     });
   }
-
+  //VERIFICA QUE EL ENEMIGO TENGA PISO DELANTE DE EL
   protected checkGroundAhead(direction: 1 | -1): boolean {
     const checkDistance = 40;
     const checkX = this.sprite.x + checkDistance * direction;
@@ -214,7 +214,7 @@ export default class Enemy {
 
     return false;
   }
-
+  //RECIBE DAÑO
   takeHit() {
     if (this.isDead) return;
 
@@ -258,7 +258,7 @@ export default class Enemy {
       this.die();
     }
   }
-
+  //MUERE EL ENEMIGO
   protected die() {
     this.isDead = true;
     this.soundWalk.stop();

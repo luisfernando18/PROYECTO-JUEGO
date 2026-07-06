@@ -115,7 +115,8 @@ export default class Player {
     this.sprite.play("idle");
 
     this.scene.physics.add.collider(this.sprite, platforms);
-
+    
+    // TECLADO
     this.cursors = this.scene.input.keyboard!.createCursorKeys();
     this.wasd = {
       up: this.scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
@@ -297,6 +298,10 @@ export default class Player {
       if ((this.soundRun as any).isPlaying) this.soundRun.stop();
       if ((this.soundAttack as any).isPlaying) this.soundAttack.stop();
     } catch (e) { }
+
+    //VERIFICA QUE EL SPRITE Y SU BODY EXISTAN ANTES DE USARLOS
+    if (!this.sprite || !this.sprite.body) return;
+
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
     body.setVelocity(0, 0);
     this.sprite.play("idle", true);
