@@ -76,7 +76,7 @@ export default function PauseOverlay({ onResume, onMainMenu }: Props) {
                 <div className={styles.container}>
                     <h2 className={styles.title}>PAUSA</h2>
                     <div className={styles.buttons}>
-                        {["▶️ Reanudar", "? Instrucciones", "✕ Menú Principal"].map((text, idx) => (
+                        {["Reanudar", "Instrucciones", "Menú Principal"].map((text, idx) => (
                             <button
                                 key={idx}
                                 className={`${styles.btn} ${focusedButton === idx ? styles.btnFocused : ""} ${idx === 2 ? styles.btnDanger : ""}`}

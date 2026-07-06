@@ -44,16 +44,8 @@ export default class Boss {
   }
 
   static preload(scene: Phaser.Scene) {
-    scene.load.spritesheet("boss-float", "/assets/sprites/Boss/Diablo flotando.png", {
-      frameWidth: 64,
-      frameHeight: 64,
-    });
-    scene.load.spritesheet("boss-attack", "/assets/sprites/Boss/Diablo ataque.png", {
-      frameWidth: 64,
-      frameHeight: 64,
-    });
-
-    //SONIDOS
+    scene.load.spritesheet("boss-float", "/assets/sprites/Boss/Diablo flotando.png", { frameWidth: 64, frameHeight: 64 });
+    scene.load.spritesheet("boss-attack", "/assets/sprites/Boss/Diablo ataque.png", { frameWidth: 64, frameHeight: 64 });
     scene.load.audio("boss-float-sound", "/assets/audio/Boss/boss-flotando.mp3");
     scene.load.audio("boss-attack-sound", "/assets/audio/Boss/boss-ataque.mp3");
     scene.load.audio("boss-sweep-sound", "/assets/audio/Boss/boss-barrido.mp3");
@@ -74,50 +66,19 @@ export default class Boss {
     body.setSize(40, 50);
     body.setOffset(12, 6);
 
-    this.scene.anims.create({
-      key: "boss-float",
-      frames: this.scene.anims.generateFrameNumbers("boss-float", { start: 0, end: 2 }),
-      frameRate: 6,
-      repeat: -1,
-    });
-
-    this.scene.anims.create({
-      key: "boss-attack",
-      frames: this.scene.anims.generateFrameNumbers("boss-attack", { start: 0, end: 3 }),
-      frameRate: 10,
-      repeat: 0,
-    });
-
-    // Animación de barrido en loop (repeat: -1) separada del ataque normal
-    this.scene.anims.create({
-      key: "boss-sweep",
-      frames: this.scene.anims.generateFrameNumbers("boss-attack", { start: 0, end: 3 }),
-      frameRate: 12,
-      repeat: -1, // loop durante todo el barrido
-    });
+    this.scene.anims.create({ key: "boss-float", frames: this.scene.anims.generateFrameNumbers("boss-float", { start: 0, end: 2 }), frameRate: 6, repeat: -1 });
+    this.scene.anims.create({ key: "boss-attack", frames: this.scene.anims.generateFrameNumbers("boss-attack", { start: 0, end: 3 }), frameRate: 10, repeat: 0 });
+    this.scene.anims.create({ key: "boss-sweep", frames: this.scene.anims.generateFrameNumbers("boss-attack", { start: 0, end: 3 }), frameRate: 12, repeat: -1 });
 
     this.sprite.play("boss-float");
 
-    const barWidth = 400;
-    const barHeight = 20;
-    const barX = W / 2 - barWidth / 2;
-    const barY = H - 60;
+    const barWidth = 400; const barHeight = 20;
+    const barX = W / 2 - barWidth / 2; const barY = H - 60;
 
-    this.nameText = this.scene.add.text(W / 2, barY - 25, "EL DIABLO - FALSA PROMESA", {
-      fontFamily: "serif",
-      fontSize: "16px",
-      color: "#e8d5a3",
-      letterSpacing: 4,
-    }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(10);
-
-    this.hpBarBg = this.scene.add.rectangle(barX, barY, barWidth, barHeight, 0x1a0a00)
-      .setOrigin(0, 0).setScrollFactor(0).setDepth(10);
-
-    this.scene.add.rectangle(barX - 2, barY - 2, barWidth + 4, barHeight + 4, 0x6b5030)
-      .setOrigin(0, 0).setScrollFactor(0).setDepth(9);
-
-    this.hpBarFill = this.scene.add.rectangle(barX, barY, barWidth, barHeight, 0xc0392b)
-      .setOrigin(0, 0).setScrollFactor(0).setDepth(11);
+    this.nameText = this.scene.add.text(W / 2, barY - 25, "EL DIABLO - FALSA PROMESA", { fontFamily: "serif", fontSize: "16px", color: "#e8d5a3", letterSpacing: 4 }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(10);
+    this.hpBarBg = this.scene.add.rectangle(barX, barY, barWidth, barHeight, 0x1a0a00).setOrigin(0, 0).setScrollFactor(0).setDepth(10);
+    this.scene.add.rectangle(barX - 2, barY - 2, barWidth + 4, barHeight + 4, 0x6b5030).setOrigin(0, 0).setScrollFactor(0).setDepth(9);
+    this.hpBarFill = this.scene.add.rectangle(barX, barY, barWidth, barHeight, 0xc0392b).setOrigin(0, 0).setScrollFactor(0).setDepth(11);
 
     this.normalAttackTimer = this.scene.time.now;
     this.sweepTimer = this.scene.time.now;
@@ -126,38 +87,26 @@ export default class Boss {
     this.soundAttack = this.scene.sound.add("boss-attack-sound", { volume: 0.6 });
     this.soundSweep = this.scene.sound.add("boss-sweep-sound", { loop: true, volume: 0.6 });
     this.soundDeath = this.scene.sound.add("boss-death-sound", { volume: 0.5 });
-    this.soundFloat.play(); // arranca flotando desde el inicio
+    this.soundFloat.play();
   }
 
   update() {
     if (this.state === "dead") return;
-
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
+    if (!body || !body.enable) return;
+
     const now = this.scene.time.now;
 
-    if (
-      this.state === "following" &&
-      now - this.sweepTimer >= this.sweepInterval
-    ) {
+    if (this.state === "following" && now - this.sweepTimer >= this.sweepInterval) {
       this.startSweep();
       return;
     }
-
-    if (
-      this.state === "following" &&
-      now - this.normalAttackTimer >= this.normalAttackInterval
-    ) {
+    if (this.state === "following" && now - this.normalAttackTimer >= this.normalAttackInterval) {
       this.performNormalAttack();
       return;
     }
-
-    if (this.state === "following") {
-      this.followPlayer(body);
-    }
-
-    if (this.state === "sweeping") {
-      this.performSweep(body);
-    }
+    if (this.state === "following") this.followPlayer(body);
+    if (this.state === "sweeping") this.performSweep(body);
   }
 
   private followPlayer(body: Phaser.Physics.Arcade.Body) {
@@ -173,10 +122,7 @@ export default class Boss {
     } else {
       body.setVelocity(0, 0);
     }
-
-    if (this.sprite.anims.currentAnim?.key !== "boss-float") {
-      this.sprite.play("boss-float", true);
-    }
+    if (this.sprite.anims.currentAnim?.key !== "boss-float") this.sprite.play("boss-float", true);
   }
 
   private performNormalAttack() {
@@ -188,16 +134,12 @@ export default class Boss {
 
     this.sprite.play("boss-attack");
     this.sprite.once("animationcomplete", () => {
-      if (this.state === "dead") return;
-
+      if (this.state === "dead" || !this.sprite.active) return;
+      
       const playerSprite = this.player.getSprite();
-      const dx = Math.abs(this.sprite.x - playerSprite.x);
-      const dy = Math.abs(this.sprite.y - playerSprite.y);
-      const distance = Math.sqrt(dx * dx + dy * dy);
+      const distance = Phaser.Math.Distance.Between(this.sprite.x, this.sprite.y, playerSprite.x, playerSprite.y);
 
-      if (distance < 200) {
-        this.player.takeDamage(this.normalAttackDamage);
-      }
+      if (distance < 200) this.player.takeDamage(this.normalAttackDamage);
 
       this.sprite.play("boss-float", true);
       this.state = "following";
@@ -209,9 +151,7 @@ export default class Boss {
   private startSweep() {
     this.state = "preparing_sweep";
     this.soundSweep.play();
-    const H = this.scene.scale.height;
-    const W = this.scene.scale.width;
-
+    const { height: H, width: W } = this.scene.scale;
     const startLeft = Math.random() < 0.5;
     const startX = startLeft ? 80 : W - 80;
     const targetX = startLeft ? W - 80 : 80;
@@ -222,141 +162,86 @@ export default class Boss {
 
     this.scene.tweens.add({
       targets: this.sprite,
-      x: startX,
-      y: groundY,
+      x: startX, y: groundY,
       duration: 3500,
       ease: "Power2",
       onComplete: () => {
-        // Flip correcto según dirección del barrido
+        if (!this.sprite || !this.sprite.active) return;
         this.sprite.setFlipX(startLeft ? false : true);
-        // Usa boss-sweep que está en loop
         this.sprite.play("boss-sweep", true);
         this.scene.time.delayedCall(600, () => {
-          this.state = "sweeping";
-          this.sweepTargetX = targetX;
+          if (this.state !== "dead" && this.sprite.active) {
+            this.state = "sweeping";
+            this.sweepTargetX = targetX;
+          }
         });
       },
     });
   }
 
   private performSweep(body: Phaser.Physics.Arcade.Body) {
+    if (!body.enable) return;
     const dx = this.sweepTargetX - this.sprite.x;
-
-    // Flip correcto durante el barrido — mira hacia donde avanza
     this.sprite.setFlipX(dx > 0);
 
     if (Math.abs(dx) > 20) {
       body.setVelocityX(dx > 0 ? 1100 : -1100);
       body.setVelocityY(0);
-
-      // Daño solo si el boss toca directamente al jugador (overlap real)
       const now = this.scene.time.now;
       if (now - this.lastDamageTime >= this.damageCooldown) {
         const playerSprite = this.player.getSprite();
-        const distX = Math.abs(this.sprite.x - playerSprite.x);
-        const distY = Math.abs(this.sprite.y - playerSprite.y);
-
-        // Solo daña si hay colisión real entre boss y jugador
-        if (distX < 60 && distY < 80) {
+        const dist = Phaser.Math.Distance.Between(this.sprite.x, this.sprite.y, playerSprite.x, playerSprite.y);
+        if (dist < 80) {
           this.lastDamageTime = now;
           this.player.takeDamage(40);
         }
       }
     } else {
-      // Terminó el barrido
       body.setVelocity(0, 0);
       this.soundSweep.stop();
       this.soundFloat.play();
       this.sprite.play("boss-float", true);
       this.state = "following";
       this.sweepTimer = this.scene.time.now;
-      this.normalAttackTimer = this.scene.time.now;
     }
   }
 
   takeHit() {
     if (this.state === "dead") return;
-
     this.hp -= 5;
-    if (this.hp < 0) this.hp = 0;
-
-    const percent = this.hp / this.maxHp;
-    this.hpBarFill.setDisplaySize(400 * percent, 20);
-
+    this.hpBarFill.setDisplaySize(400 * (this.hp / this.maxHp), 20);
     this.sprite.setTint(0xff0000);
-    this.scene.time.delayedCall(150, () => {
-      if (this.state !== "dead") this.sprite.clearTint();
-    });
-
-    const s = this.currentScale;
-    this.scene.tweens.add({
-      targets: this.sprite,
-      scaleX: s + 0.2,
-      scaleY: s - 0.2,
-      duration: 50,
-      yoyo: true,
-      repeat: 2,
-      onComplete: () => {
-        if (this.state !== "dead") {
-          this.sprite.setScale(s);
-        }
-      },
-    });
-
-    const playerX = this.player.getSprite().x;
-    const knockbackDir = this.sprite.x > playerX ? 1 : -1;
-    const body = this.sprite.body as Phaser.Physics.Arcade.Body;
-
+    this.scene.time.delayedCall(150, () => { if (this.state !== "dead") this.sprite.clearTint(); });
+    
     this.state = "knockback";
-    body.setVelocityX(400 * knockbackDir);
+    const body = this.sprite.body as Phaser.Physics.Arcade.Body;
+    body.setVelocityX(this.sprite.x > this.player.getSprite().x ? 400 : -400);
+    this.scene.time.delayedCall(200, () => { if (this.state !== "dead") body.setVelocityX(0); });
+    this.scene.time.delayedCall(600, () => { if (this.state !== "dead") this.state = "following"; });
 
-    this.scene.time.delayedCall(200, () => {
-      if (this.state !== "dead") body.setVelocityX(0);
-    });
-
-    this.scene.time.delayedCall(600, () => {
-      if (this.state !== "dead") this.state = "following";
-    });
-
-    if (this.hp <= 0) {
-      this.die();
-    }
+    if (this.hp <= 0) this.die();
   }
 
   private die() {
     this.state = "dead";
     this.soundDeath.play();
-    this.soundFloat.stop();
-    this.soundSweep.stop();
-    this.soundAttack.stop();
-
-    const body = this.sprite.body as Phaser.Physics.Arcade.Body;
-    body.setVelocity(0, 0);
-    body.enable = false;
+    this.soundFloat.stop(); this.soundSweep.stop(); this.soundAttack.stop();
+    (this.sprite.body as Phaser.Physics.Arcade.Body).enable = false;
 
     this.scene.tweens.add({
       targets: this.sprite,
       alpha: 0,
       duration: 800,
       onComplete: () => {
-        this.sprite.destroy();
-        this.hpBarBg.destroy();
-        this.hpBarFill.destroy();
-        this.nameText.destroy();
-
-        this.scene.time.delayedCall(1000, () => {
-          gameEvents.emit("bossDefeated", 1);
-          gameEvents.emit("playerWon");
-        });
+        if (this.sprite) {
+          this.sprite.destroy();
+          this.hpBarBg.destroy(); this.hpBarFill.destroy(); this.nameText.destroy();
+          this.scene.time.delayedCall(1000, () => { gameEvents.emit("bossDefeated", 1); gameEvents.emit("playerWon"); });
+        }
       },
     });
   }
 
-  getSprite() {
-    return this.sprite;
-  }
-
-  getIsDead() {
-    return this.state === "dead";
-  }
+  getSprite() { return this.sprite; }
+  getIsDead() { return this.state === "dead"; }
 }

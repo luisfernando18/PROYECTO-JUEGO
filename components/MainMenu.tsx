@@ -162,7 +162,7 @@ export default function MainMenu() {
         </div>
       )}
 
-      <div className={styles.credits}>©️ 2026 ULEAM <br /><br />Proyecto Universitario <br /><br /> Carrera de <br />Tecnologias de la información <br /><br />ULEAM</div>
+      <div className={styles.credits}>© 2026 ULEAM <br /><br />Proyecto Universitario <br /><br /> Carrera de <br />Tecnologias de la información <br /><br />ULEAM</div>
     </div>
   );
 }
