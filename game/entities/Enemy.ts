@@ -49,11 +49,11 @@ export default class Enemy {
   }
 
   static preload(scene: Phaser.Scene) {
-    scene.load.spritesheet("enemy-run", "/assets/sprites/enemy/correr_enemigo.png", {
+    scene.load.spritesheet("enemy-run", "/assets/sprites/Enemy/correr_enemigo.png", {
       frameWidth: 64,
       frameHeight: 64,
     });
-    scene.load.spritesheet("enemy-attack", "/assets/sprites/enemy/ataque_oso.png", {
+    scene.load.spritesheet("enemy-attack", "/assets/sprites/Enemy/ataque_oso.png", {
       frameWidth: 64,
       frameHeight: 64,
     });
