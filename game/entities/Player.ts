@@ -56,10 +56,10 @@ export default class Player {
       frameHeight: 64,
     });
 
-    scene.load.audio("player-run", "/assets/audio/Player/Player-correr.mp3");
-    scene.load.audio("player-jump", "/assets/audio/Player/Player-salto.mp3");
-    scene.load.audio("player-attack", "/assets/audio/Player/Player-ataque.mp3");
-    scene.load.audio("player-death", "/assets/audio/Player/Player-muerte1.mp3");
+    scene.load.audio("player-run", "/assets/audio/Player/Player_correr.mp3");
+    scene.load.audio("player-jump", "/assets/audio/Player/Player_salto.mp3");
+    scene.load.audio("player-attack", "/assets/audio/Player/Player_ataque.mp3");
+    scene.load.audio("player-death", "/assets/audio/Player/Player_muerte1.mp3");
   }
 
   create(x: number, y: number, platforms: Phaser.Physics.Arcade.StaticGroup) {
