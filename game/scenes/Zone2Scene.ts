@@ -22,10 +22,10 @@ export default class Zone2Scene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("bg-sky-2", "/assets/sprites/zone2/Fondo - zona2.png");
-    this.load.image("bg-mid-2", "/assets/sprites/zone2/Medio - zona2.png");
-    this.load.image("bg-front-2", "/assets/sprites/zone2/Frente - zona2.png");
-    this.load.image("ground-2", "/assets/sprites/zone2/Suelo - zona2.png");
+    this.load.image("bg-sky-2", "/assets/sprites/zone2/fondo_zona2.png");
+    this.load.image("bg-mid-2", "/assets/sprites/zone2/medio_zona2.png");
+    this.load.image("bg-front-2", "/assets/sprites/zone2/frente_zona2.png");
+    this.load.image("ground-2", "/assets/sprites/zone2/suelo_zona2.png");
     this.load.audio("zone2-music", "/assets/audio/Peldaños Hacia la Santidad.mp3");
 
     Player.preload(this);

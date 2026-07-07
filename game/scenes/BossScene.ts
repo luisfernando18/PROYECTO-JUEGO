@@ -18,8 +18,8 @@ export default class BossScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("bg-boss", "/assets/sprites/BossScene/Fondo - boss.png");
-    this.load.image("ground-boss", "/assets/sprites/BossScene/Suelo - boss.png");
+    this.load.image("bg-boss", "/assets/sprites/BossScene/fondo_boss.png");
+    this.load.image("ground-boss", "/assets/sprites/BossScene/suelo_boss.png");
     this.load.audio("boss-music", "/assets/audio/MusicaBoss.mp3");
 
     Player.preload(this);

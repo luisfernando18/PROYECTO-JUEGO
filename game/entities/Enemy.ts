@@ -53,7 +53,7 @@ export default class Enemy {
       frameWidth: 64,
       frameHeight: 64,
     });
-    scene.load.spritesheet("enemy-attack", "/assets/sprites/enemy/ataque oso.png", {
+    scene.load.spritesheet("enemy-attack", "/assets/sprites/enemy/ataque_oso.png", {
       frameWidth: 64,
       frameHeight: 64,
     });

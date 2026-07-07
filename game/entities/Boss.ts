@@ -44,8 +44,8 @@ export default class Boss {
   }
 
   static preload(scene: Phaser.Scene) {
-    scene.load.spritesheet("boss-float", "/assets/sprites/Boss/Diablo flotando.png", { frameWidth: 64, frameHeight: 64 });
-    scene.load.spritesheet("boss-attack", "/assets/sprites/Boss/Diablo ataque.png", { frameWidth: 64, frameHeight: 64 });
+    scene.load.spritesheet("boss-float", "/assets/sprites/Boss/diablo_flotando.png", { frameWidth: 64, frameHeight: 64 });
+    scene.load.spritesheet("boss-attack", "/assets/sprites/Boss/diablo_ataque.png", { frameWidth: 64, frameHeight: 64 });
     scene.load.audio("boss-float-sound", "/assets/audio/Boss/boss-flotando.mp3");
     scene.load.audio("boss-attack-sound", "/assets/audio/Boss/boss-ataque.mp3");
     scene.load.audio("boss-sweep-sound", "/assets/audio/Boss/boss-barrido.mp3");
