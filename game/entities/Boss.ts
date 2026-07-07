@@ -46,10 +46,10 @@ export default class Boss {
   static preload(scene: Phaser.Scene) {
     scene.load.spritesheet("boss-float", "/assets/sprites/Boss/diablo_flotando.png", { frameWidth: 64, frameHeight: 64 });
     scene.load.spritesheet("boss-attack", "/assets/sprites/Boss/diablo_ataque.png", { frameWidth: 64, frameHeight: 64 });
-    scene.load.audio("boss-float-sound", "/assets/audio/Boss/boss-flotando.mp3");
-    scene.load.audio("boss-attack-sound", "/assets/audio/Boss/boss-ataque.mp3");
-    scene.load.audio("boss-sweep-sound", "/assets/audio/Boss/boss-barrido.mp3");
-    scene.load.audio("boss-death-sound", "/assets/audio/Boss/boss-muerte1.mp3");
+    scene.load.audio("boss-float-sound", "/assets/audio/Boss/Boss-flotando.mp3");
+    scene.load.audio("boss-attack-sound", "/assets/audio/Boss/Boss-ataque.mp3");
+    scene.load.audio("boss-sweep-sound", "/assets/audio/Boss/Boss-barrido.mp3");
+    scene.load.audio("boss-death-sound", "/assets/audio/Boss/Boss-muerte1.mp3");
   }
 
   create(x: number, y: number, platforms: Phaser.Physics.Arcade.StaticGroup) {
